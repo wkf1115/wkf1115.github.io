@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587461464461">
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587461607519">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
 
 
@@ -31,7 +31,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://wkf1115.github.io">
-        <img src="https://wkf1115.github.io/images/avatar.png?v=1587461464461" class="site-logo">
+        <img src="https://wkf1115.github.io/images/avatar.png?v=1587461607519" class="site-logo">
         <h1 class="site-title">WKF1115</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -159,7 +159,7 @@
                 2.1.操作成功，代表此时锁没有线程使用。
                 2.2.操作失败，代表这个锁已被修改（CAS没有通过），此时由于是轻量级锁，此线程会选择进行自旋等待锁被释放，自旋一定次数会膨胀。
                 🍉持有锁的线程会把程序体执行完成再进行解锁。
-                🍉这里提到的自旋实际上就是等待一段时间，没有锁线程等待有锁的线程释放锁，等一会可以，如果时间太久了那么等待中的线程不干了就会掀桌。表现为						     进行膨胀，将锁升级为重量级。
+                🍉这里提到的自旋实际上就是等待一段时间，没有锁线程等待有锁的线程释放锁，等一会可以，如果时间太久了那么等待中的线程不干了就会掀桌。表现为进行膨胀，将锁升级为重量级。
 
             🍍——————————中间过程为拿到锁的线程执行方法体的过程——————————🍍
 

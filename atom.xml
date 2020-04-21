@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://wkf1115.github.io</id>
     <title>WKF1115</title>
-    <updated>2020-04-21T09:31:30.758Z</updated>
+    <updated>2020-04-21T09:34:51.950Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://wkf1115.github.io"/>
     <link rel="self" href="https://wkf1115.github.io/atom.xml"/>
@@ -371,7 +371,7 @@
                 2.1.操作成功，代表此时锁没有线程使用。
                 2.2.操作失败，代表这个锁已被修改（CAS没有通过），此时由于是轻量级锁，此线程会选择进行自旋等待锁被释放，自旋一定次数会膨胀。
                 🍉持有锁的线程会把程序体执行完成再进行解锁。
-                🍉这里提到的自旋实际上就是等待一段时间，没有锁线程等待有锁的线程释放锁，等一会可以，如果时间太久了那么等待中的线程不干了就会掀桌。表现为						     进行膨胀，将锁升级为重量级。
+                🍉这里提到的自旋实际上就是等待一段时间，没有锁线程等待有锁的线程释放锁，等一会可以，如果时间太久了那么等待中的线程不干了就会掀桌。表现为进行膨胀，将锁升级为重量级。
 
             🍍——————————中间过程为拿到锁的线程执行方法体的过程——————————🍍
 
