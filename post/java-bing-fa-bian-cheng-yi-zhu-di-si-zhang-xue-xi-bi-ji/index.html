@@ -1,0 +1,252 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Java并发编程艺术第四章学习笔记📒 | Gridea</title>
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587460267910">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Java并发编程艺术第四章学习笔记📒 | Gridea - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="第四章：JAVA并发编程基础
+实际上JAVA天生是一个多线程语言，在运行mian方法的时候就会执行多个线程。多线程带来了许多好处，更多的处理器核心，更快的响应时间，更好的编程模型。
+
+1.线程优先级：
+    现代操作系统分配内存时会分出一..." />
+    <meta name="keywords" content="Java并发编程的艺术" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://wkf1115.github.io">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587460267910" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Java并发编程艺术第四章学习笔记📒
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-04-21
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+                <a href="https://wkf1115.github.io/tag/java/syvo/" class="post-tag">
+                  # Java并发编程的艺术
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>第四章：JAVA并发编程基础</p>
+<pre><code>实际上JAVA天生是一个多线程语言，在运行mian方法的时候就会执行多个线程。多线程带来了许多好处，更多的处理器核心，更快的响应时间，更好的编程模型。
+</code></pre>
+<p>1.线程优先级：</p>
+<pre><code>    现代操作系统分配内存时会分出一个个时间片，每一个线程使用不等数量的时间片，线程时间片用完了就会发生线程调度。
+
+    线程优先级就是线程需要多少处理器的资源。
+
+    首先Java线程是通过一个名字叫做priority的整形成员变量来控制优先级，优先级的范围是1～10。
+    可以通过setPriority(int)方法设置优先级，默认优先级是5，优先级高的线程时间片要多于低的。
+
+    🍉频繁阻塞（休眠或者I/O操作）的线程需要设置较高的优先级，偏重计算（需要较多cpu时间或者偏运算）的线程需要较低的优先级。
+    🍉这样可以避免cpu资源被偏重计算的线程独占。
+    
+    🍎线程优先性的设置，在很多实际jvm环境中都不会生效，所以这条仅供参考。
+</code></pre>
+<p>2.线程的状态：</p>
+<pre><code>    线程在生命周期中有6种状态：
+        
+        1.NEW：初始状态，线程刚刚被构建，还没有调用start()方法。
+        
+        2.RUNNABLE：运行状态，操作系统的就绪和运行两种状态都被称作运行状态。
+        
+        3.BLOCKED：阻塞状态，表示被锁阻塞。
+
+        4.WAITING：等待状态，表示该线程需要其它线程作出一些特定动作。
+        
+        5.TIME_WAITING：超时等待，不同于WAITING，他可以在指定时间内自行返回。
+
+        6.TERMINATED：终止状态，线程执行完毕。
+    
+    线程的运行流程：线程创建后会调用start()方法开始运行，线程执行wait()方法后，线程会进入等待状态。等待状态需要其他线程的通知才能变回运行状态，
+                    超时等待时间到达将会返回到运行状态，线程在没有获取锁的时候会进入阻塞状态，线程在执行Runnable的run()方法后会进入终止状态。
+</code></pre>
+<p>3.Daemon线程：</p>
+<pre><code>        🍉Daemon线程主要用于支持程序后台调度和支持性工作，当JVM中不存在非Daemon线程的时候，JVM会退出。
+</code></pre>
+<p>4.线程的创建：</p>
+<pre><code>        一个新线程的构造是由其parent线程进行空间分配的，它继承了parent线程是否为Daemon，优先级，加载资源的contextClassLoader还有可继承的ThreadLocal，
+        这个线程还会有唯一的ID。
+        
+        创建结束之后调用start()方法就可以启动线程，只要线程规划器空闲，应该立即启动该线程。
+</code></pre>
+<p>5.线程的终止：</p>
+<pre><code>        线程的中断操作可以作为一种简便的线程间交互方式，同时也可在线程内设置变量来控制线程的终止。
+</code></pre>
+<p>6.synchronized的方式：</p>
+<pre><code>        任意线程对Object的访问需要经过它的Monitor（监视器），线程首先对监视器执行Monitor.Enter()方法，如果Enter失败，线程会进入一个同步队列。
+        线程在释放锁的时候，会执行Monitor.exit()方法，同步队列检测到exit方法被调用时，队头的线程会执行出队操作并执行Monitor.Enter()方法。
+</code></pre>
+<p>7.wait()和notify()：</p>
+<pre><code>        1.wait()和notify(),notifyAll()在调用时需要给先获取到锁。
+        
+        2.调用wait()方法后，线程状态变为waiting，并加入到同步队列中。
+    
+        3.notify调用后，线程不会立即从wait返回，需要调用notify的线程释放锁后，wait线程获取到锁，才有可能返回。
+            🍉（notify方法将一个wait线程从等待队列中移到同步队列中，notifyAll将等待队列中全部的线程都移到同步队列，被移动的线程由waiting变为blocked状态）
+￼
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://wkf1115.github.io/post-images/1587460118713.png" alt="" loading="lazy"></figure>
+<p>8.等待/通知的经典范式：</p>
+<pre><code>        等待方：
+        
+            1.获取对象的锁
+            2.如果条件不满足，调用对象的wait()方法，如果条件满足停止wait()
+        
+        通知方：
+            
+            1.获得对象的锁
+            2.改变条件
+            3.通知所有等待的线程
+</code></pre>
+<p>9.thread.join()的使用：</p>
+<pre><code>        如果一个线程A执行了B.join()语句，那么A等待B线程结束之后才会从B.join()返回（继续执行）。
+        从源码角度来看，join()的实现使用了等待/通知的经典范式—加锁，循环，和处理逻辑，只不过条件变为了线程是否活着。
+</code></pre>
+<p>10.ThreadLocal的使用：</p>
+<pre><code>        ThreadLocal是线程变量，是以ThreadLocal对象为键，任意对象为值的储存结构。这个结构是附带在线程上的。也就是一个线程可以根据一个ThreadLocal对象查询				该线程的某些信息。
+
+        springAOP中可以用到此类方法。因为这个变量可以将方法拆分开，中间插入其他方法，通过变量来传递信息。</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-san-zhang-xue-xi-bi-ji/">
+              <h3 class="post-title">
+                Java并发编程艺术第三章学习笔记📒
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://wkf1115.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,368 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Java并发编程艺术第三章学习笔记📒 | Gridea</title>
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587460267910">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Java并发编程艺术第三章学习笔记📒 | Gridea - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="第三章：java内存模型（JMM）
+为了了解内存模型的基础，我们就要明白线程拥有两种通信机制：共享内存和消息传递
+共享内存通过主程序的内存来实现线程间的通信，所以它是隐式通信，同时它需要程序员显式的制定的执行顺序，也叫显式同步。
+消息传递通..." />
+    <meta name="keywords" content="Java并发编程的艺术" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://wkf1115.github.io">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587460267910" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Java并发编程艺术第三章学习笔记📒
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-04-21
+              </span>
+              <span>
+                14 min read
+              </span>
+              
+                <a href="https://wkf1115.github.io/tag/java/syvo/" class="post-tag">
+                  # Java并发编程的艺术
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>第三章：java内存模型（JMM）</p>
+<pre><code>为了了解内存模型的基础，我们就要明白线程拥有两种通信机制：共享内存和消息传递
+共享内存通过主程序的内存来实现线程间的通信，所以它是隐式通信，同时它需要程序员显式的制定的执行顺序，也叫显式同步。
+消息传递通过线程之间传递消息来实现线程间的通信，所以它是显式通信，同时它不需要程序员人为指定执行顺序，因为消息发送必须在消息接收前，也叫隐式同步。
+</code></pre>
+<p>1.JMM的抽象结构：</p>
+<pre><code>    java中的共享变量（实例域，静态域，数组元素）都储存在堆内存中，这部分内存是线程共享的，也就是说他们需要受到JMM的管理。
+    
+    从抽象的角度看，每个线程拥有一个私有的本地内存，线程之间的共享变量都存在主内存中，三者之间的关系类似cpu与高速缓存与主内存的关系。
+
+    🍉本地内存与主内存之间的关系通过JMM进行控制
+    🍉线程之间的通信就类似于上一章的cpu，高速缓存，主内存模型中cpu与cpu之间的通信。（必须经过主内存）
+    🍉当然，这仅仅为抽象结构，实际并不存在。
+</code></pre>
+<p>2.🍊源代码和指令序列的重排序：（🍊本章重点，JMM离不开重排序）</p>
+<pre><code>    在执行程序时，我们写的源代码为了发挥最大性能，常常会被重排序。
+        
+        1.编译器重排序：
+
+                编译器在不影响单线程语义的情况下，会重新安排语句的执行顺序。
+        
+        2.指令级并行的重排序：
+                
+                cpu在机器指令不存在数据依赖性的情况，可以改变机器指令的执行顺序。
+
+        3.内存系统的重排序：
+                
+                对cpu的读取和储存操作进行修改，修改读写顺序。
+        
+        🍉对以上的2，3操作，JMM会对出现问题的重排序进行监管，为了不让程序出现排序错误，会在生成指令序列时在序列中插入内存屏障，通过屏障来禁止重排序
+</code></pre>
+<p>3.屏障类型：</p>
+<pre><code>    1.LoadLoad屏障，确保前面的装载（读取）命令先于后面的装载（读取）命令
+    2.StoreStore屏障，确保前面的存储（向主内存中刷入缓存区数据）先于后面的存储（向主内存中刷入缓存区数据）
+    3.LoadStore屏障，确保前面的装载先于后面的存储
+    4.StoreLoad屏障，这个屏障比较特殊，它会使前面的内存访问指令（存储和读取）先于后面的内存访问指令（存储和读取）
+</code></pre>
+<p>4.happens-before：<br>
+这是一个规则，代表着两个操作之间的关系。</p>
+<pre><code>    1.一个线程中的每个操作happens-before于该线程中的任意后续操作（程序顺序规则）
+
+    2.对于一个锁的解锁，happens-before于随后对这个锁的加锁，也就是先解锁再加锁（监视器锁规则）
+
+    3.对于一个volatile域的写，happens-before于任意后续对这个volatile域的读。（volatile变量规则）
+
+    🍎4.如果 A happens-before  B，B happens-before C，那么 A happens-before C （传递性）
+    
+    5.如果线程A执行ThreadB.start()操作，那么A线程的ThreadB.start()操作happens-before线程B的任意操作（start（）规则）
+    
+    6.如果线程A执行ThreadB.join()操作并成功返回，那么线程B的任意操作happens-beforeA线程的ThreadB.join()操作成功返回(join()规则)
+    
+    那么我们定义的happens-before规则和JMM有什么关系呢。
+
+    🍉JMM在底层定义了多个cpu重排序规则，JMM进而通过规则禁止某个重排序（通过屏障），而这个屏障呈现出来就是一个一个的happens-before规则。
+</code></pre>
+<p>5.数据依赖性：</p>
+<pre><code>    数据依赖性是什么呢，它是代表了两个操作如果被重排序了会影响结果。
+    
+    如果两个操作使用了同一个变量，且这两个操作中有一个为写操作，那么这两个操作就有了数据依赖性。
+    
+    例如写后读，写后写，读后写。这三个操作只要被重写，执行结果就会改变。
+
+    🍉在JMM排序时，会遵循数据依赖性规则，具有数据依赖的两个操作不会被重排序。要注意的是这仅仅是在单个线程中遵循的规则，线程之间并不遵守。
+</code></pre>
+<p>6.as-if-serial:</p>
+<pre><code>    as-if-serial语义就是不管怎么重排序，编译器和cpu都不能对存在数据依赖性的操作作重排序，这样保证了程序执行的结果正确。
+    🍉它为程序员营造了一个幻觉：单线程程序是按照程序的顺序来执行的。
+    🍎程序遇到if条件，cpu会执行猜测操作，即先计算if方法体的内容，将结果保存到ROB中，如果if条件为真，再把计算的值赋给if方法体内的变量，这也是一种变相的重排序。在单线程内不会影响程序结果。但在并发情况下会出现结果错误。
+</code></pre>
+<p>7.顺序一致性内存模型（被同步过的程序）：</p>
+<pre><code>    顺序一致性内存模型是被理想化的参考模型，程序员在实际操作的时候可以讲程序的执行顺序看作顺序一致性内存模型。
+    
+    🍉它的顺序为每个线程是原子性的，每个线程内部操作执行顺序是和程序顺序相同的。
+    
+    🍉实际上JMM采用的内存模型为保证线程原子性的同时对线程内部进行适当的重排序操作。
+</code></pre>
+<p>8.没有同步过的程序：</p>
+<pre><code>    JMM保证未同步的程序读取值一定是被初始化过的，要么为之前写入的，要么为默认值。
+    
+    🍉JMM不保证多线程和单线程之间的执行顺序相同，同时也不保证64位long型和double型的写操作具有原子性
+    （因为64位数据实际上写入不是一步完成的，可能会被重排序），没有同步过的单线程是不用担心的，因为数据依赖性的关系不会出现数据丢失。
+</code></pre>
+<p>9.volatile特性在内存上的理解：</p>
+<pre><code>    🍉要理解volatile特性，可以把volatile变量中读/写的操作看成对读/写操作加了同一个锁。
+
+    🍉当然，volatile实际上和锁没啥关系，上一章讲过，volatile在cpu层面上是直接使用lock命令，虽然和锁底层实现机理相同（锁的CAS操作也调用了lock）
+
+    🍉此处使用锁来做类比也是为了更好的理解volatile，在内存特性上，volatile的读和锁的获取有相同语义，volatile的写和锁的释放有相同语义（当volatile写入的时候，JMM会把该线程的本地内存刷新到主内存，当volatile读入的时候，会把线程本地内存置为无效，强制从主内存读取数据），
+
+    🍎volatile读写操作不止有原子性，也有先后顺序，最后的写操作永远先于任意的读操作（上章的cpu的总线锁和缓存锁就是为此存在的）
+
+    🍑书中写锁的内存可见性推导出volatile的内存可见性，容易被误解成volatile实现了锁的happens-before规则，但我认为书中原意是描写了volatile和锁的相似性
+        （两者都是基于cpu的内存锁和缓存锁）
+</code></pre>
+<p>10.JMM如何实现volatile的内存语义：</p>
+<pre><code>    JMM操作策略：
+
+        1.volatile写永远在后面（volatile写入之前的操作不会被重排序到volatile后面）当第二个操作是volatile写的时候，第一个操作无论是什么都不能重排序
+        2.volatile读一定在前面（volatile读之后的操作不会被重排序到volatile前面）当第一个操作是volatile读的时候，第二个操作无论是什么都不能重排序
+        3.volatile写+读也不能排序，当第一个操作是volatile写，第二个操作是volatile读的时候，不能重排序
+    
+    JMM实际操作情况：
+
+        🍉volatile写前面插入StoreStore屏障（禁止把v写和前面的写重排序），volatile写后面插入StoreLoad屏障（比较特殊禁止全部重排序，因为下面有可能有v读）
+        🍉volatile读前面插入LoadLoad屏障（禁止把前面的读和v读重排序），volatile读后面插入LoadStore屏障（禁止下面的写和v读重排序）
+        
+        JMM的屏障操作可能不是最高效的，但十分保守。
+        🍎实际操作时JMM可以根据具体情况省略屏障，比如前后并没有读/写操作，这时屏障可以被省略来节省处理器内存开支
+
+    JMM屏障的发展：
+        
+        事实上在JSR-133以前的java内存模型中，JMM允许v变量读写和普通读写的重排序，这样会导致不存在数据依赖的值（如v变量和普通变量之间）发生数据丢失。为了增强volatile的内存语义，专家组增加了上面写的那些屏障。直接导致了volatile的读写有了加锁和撤销锁的语义
+        
+    🍎volatile只能保证数据的读写是原子性的，因为volatile就是强制让线程去主内存获取数据。例子：如果两个线程同时运行i++，同时获取i=0，那么结果还是1，并没有保证线程的安全性，线程有时可能并没有更新数据，线程就被切换了。
+
+    🍊重点：JMM实现volatile实际上是运用底层lock指令，lock指令中包含了cpu屏障技术，lock指令保证volatile读写操作的原子性和顺序，
+            屏障技术仅仅阻止了重排序，但并不能阻止复杂操作的数据读取混乱，例如同时运行i++。
+
+    🍊任何带有lock前缀的指令以及CPUID等指令都有内存屏障的作用。
+</code></pre>
+<p>11.锁特性在内存上的理解：</p>
+<pre><code>    实际上
+
+        🍉当线程释放锁时，JMM会将线程的本地内存立刻刷新到主内存中（参照上一章的图片），其实线程释放锁就是volatile的写入（上面把锁和volatile一起讲解，现在能看明白了吧）。
+    
+        🍉当线程获得锁时，JMM会把线程对应的本地内存置无效，并去主内存中读取数值，其实线程获得锁就是volatile的读取。
+    
+    🍎线程1释放锁—线程2获取锁的过程就是线程1向线程2发送信息的过程（通过主内存）
+</code></pre>
+<p>12.JMM如何实现锁：</p>
+<pre><code>    分析java中一个加锁类ReentrantLock的源代码：
+
+        它调用一个lock()方法获取锁，unlock()方法释放锁。
+    
+        🍉这个类的实现依赖于AQS（java同步器框架），原理为AQS会维护一个整形的volatile变量state。这个类分为公平锁和非公平锁
+
+        公平锁：在获取锁时首先读volatile变量，这时共享变量只有当前获取锁的线程可以看到。
+                    释放锁时写volatile变量，并且使共享变量对其他获取锁的线程可见。
+
+        非公平锁：释放锁时和公平锁操作相同。
+                    在获取锁的时候使用CAS方法更新state变量，CAS同时具有volatile读和写的内存语义。
+    
+    🍎通过这个类可以分析出，java中锁处理具有两种方式：
+            1.通过volatile读写的内存语义上锁
+            2.利用CAS进行上锁（CAS附带volatile的语义）	
+</code></pre>
+<p>13.CAS是如何实现的：</p>
+<pre><code>        首先，CAS同时具有volatile读和写的内存语义
+        
+        比较和交换（Conmpare And Swap）是用于实现多线程同步的原子指令。 它将内存位置的内容与给定值进行比较，只有在相同的情况下，将该内存位置的内容修改为新的给定值。
+        
+        CAS实际上是调用本地处理器中的C++代码，如果程序在多处理器上运行，c++代码执行带有lock前缀的cmpxchg。如果在单处理器上运行，就会省略lock前缀。
+
+        🍉在同一时刻，只会有一个线程更新数据成功
+</code></pre>
+<p>14.concurrent包的实现：</p>
+<pre><code>    由于java的CAS和volatile运用了cpu上的原子指令，并且他们可以实现线程之间的通信，所以concurrent的通用化实现模式就诞生了。
+
+    实现模式：声明变量为volatile，使用CAS实现线程之间的同步，之后使用volatile的读和写还有CAS所具有的v内存语义实现线程的通信。
+
+    🍊🍊🍊重点：volatile只能保证数据读写的原子性，涉及到复杂操作，volatile并不能保证，所以这里使用CAS去更新。因为CAS每次更新前都要比较。
+    
+    整体来看，concurrent包使用了底层CAS和volatile实现了AQS，非阻塞数据结构和原子变量类，进而实现其他高层类。
+</code></pre>
+<p>15.final在内存上的理解：</p>
+<pre><code>    1.final的重排序规则：
+        
+        1.这两个操作不能重排序，对一个对象的final变量的写入———————把这个对象的引用进行赋值给另一个引用
+        2.这两个操作不能重排序，初次读一个包含final变量的引用———————初次读这个final变量
+        
+        下面对这两个重排序禁止规则详细介绍：
+            
+            1.final写的重排序：
+                JMM禁止把构造函数中的写final变量操作排序到构造函数外面。
+
+                🍉具体实现操作是JMM会在final变量写操作之后，构造函数结束的return之前，插入一个StoreStore屏障。这样就保证了构造函数执行完成前，final数据一定被初始化了。
+                
+                🍉像不是final的变量，在构造函数中赋值写入的操作可能就会被重排序到读取的后面，导致数据丢失。
+        
+            2.final读的重排序：
+                JMM禁止读对象引用和读对象的final值重排序
+        
+                （这两个操作实际上具有间接依赖关系，大部分处理器都不会重排序他们，但少部分处理器会重排序，这个规则就是为此存在的）
+
+        🍎引用类型的final变量，和基本数据类型的重排序规则差不多，但是引用内部的数据初始化可能并不正确，
+                比如数组类型，可能只能初始化大小，内部的值是否初始化不一定，因为会被重排序。
+
+        🍉还有一点，具有final变量的类，构造方法中不能出现this，这样会导致“溢出”，因为在构造方法结束之前就初始化了此对象，这样会导致屏障不能得到正确的使用。
+</code></pre>
+<p>16.final在cpu中的实现：</p>
+<pre><code>    🍉final实际上就是在final写后和构造的return前插入StoreStore屏障，在final读前插入LoadLoad屏障。
+    
+    🍉在X86处理器中，因为X86不会对写-写作重排序，所以会忽略StoreStore屏障，同时final读对象引用实际上具有间接依赖关系，X86也不会处理这个操作。
+            发现了吗，实际上X86对final没有进行任何操作。
+    
+    🍉现在，final修饰的变量，只要保证被正确构造，在任意线程就能看到这个被构造函数初始化之后的值。
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-di-er-zhang-xue-xi-bi-ji/">
+              <h3 class="post-title">
+                Java并发编程艺术第二章学习笔记📒
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://wkf1115.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
