@@ -1,0 +1,484 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>深入了解Java虚拟机第二章笔记📒 | WKF1115</title>
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587721283366">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="深入了解Java虚拟机第二章笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="第二章：垃圾收集器与内存分配策略
+   首先，程序计数器，虚拟机栈和本地方法栈由于是编译时就可以确定内存大小的，所以不需要GC进行处理。 相反，Java堆和方法区不一样，只有在运行期才可以看出来需要创建多少对象，哪些对象不同的程序分支会分配..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://wkf1115.github.io">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587721283366" alt="">
+  </a>
+  <h1 class="site-title">
+    WKF1115
+  </h1>
+  <p class="site-description">
+    快乐咸鱼🐟每一天
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              深入了解Java虚拟机第二章笔记📒
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-04-24
+              </span>
+              <span>
+                17 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>第二章：垃圾收集器与内存分配策略</p>
+<p>   首先，程序计数器，虚拟机栈和本地方法栈由于是编译时就可以确定内存大小的，所以不需要GC进行处理。 相反，Java堆和方法区不一样，只有在运行期才可以看出来需要创建多少对象，哪些对象不同的程序分支会分配不同数量的内存。<br>
+   所以，需要GC进行处理，不然内存会有溢出或者泄漏的风险</p>
+<ul>
+<li>
+<p>1.判断对象是否死去：</p>
+<ul>
+<li>
+<p>1.引用计数算法：</p>
+<p>给对象添加一个引用计数器，每当有地方引用它时，计数器+1，失去引用时，计数器-1，计数器为0的对象会被判断为失效。<br>
+（主流的JVM没有使用此方法，因为它无法解决对象之间的循环引用。如果A对象的字段引用B对象，B对象的字段引用A对象，这两个对象已经失效，因为除了他们自己，外界已经无法访问。但如果使用引用计数算法，这两个对象不能被回收。）</p>
+</li>
+<li>
+<p>2.可达性分析算法：</p>
+<p>🍉主流的商用语言的主流实现都是这么判断的，通过一个GC Roots对象根节点向下搜索，当一个对象无法从GC Root向下搜索查到，证明这个对象不可用。如图中的5，6，7虽然相互引用，但是无法与根节点产生联系。<br>
+<img src="https://wkf1115.github.io/post-images/1587720275460.png" alt="" loading="lazy"></p>
+<ul>
+<li>java中可作为GC Roots的对象包括：
+<ul>
+<li>1.虚拟机栈中引用的对象</li>
+<li>2.方法区中类静态属性引用的对象</li>
+<li>3.方法区中常量引用的对象</li>
+<li>4.本地方法栈中Native方法引用的对象</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>3.引用的分类：</p>
+<ul>
+<li>
+<p>谈到对象是否应该被销毁，就要谈到对象的引用。<br>
+JDK1.2以前，如果引用类型保存着一个对象的内存地址就称为代表一个引用。<br>
+🍉（这种分类方式不够好，因为这时一个对象只有存在引用和不存在引用两种情况）<br>
+🍉因为很多时候，对象在内存空间足够的时候最好保留，内存没地方再按照对象优先级进行销毁。</p>
+</li>
+<li>
+<p>1.强引用：就是一般的将对象指向一个引用Object obj = new Object();<br>
+只要obj这个引用存在，GC就不会回收那个对象。</p>
+</li>
+<li>
+<p>2.软引用：有用但非必须，内存即将溢出的时候GC会对它们进行回收</p>
+</li>
+<li>
+<p>3.弱引用：比软引用更没用的对象，它们只能存活到下次GC发生之前。</p>
+</li>
+<li>
+<p>4虚引用（幽灵引用，幻影引用）：最弱的引用关系，这个“虚”字并不会影响他的生存时间，仅仅是它被回收的时候可以收到一个系统通知。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>4.对象什么时候才叫真的死了？</p>
+<ul>
+<li>
+<p>一个对象真的死亡，要经历两次标记过程。</p>
+<ul>
+<li>第一次：可达性分析发现一个对象没有和GC Roots相连接，会被第一次标记，并判断是否应该执行finalize()方法，如果没有必要执行，对象会被回收，如果有必要执行，进入下一步。</li>
+<li>第二次：对象进入F-queue，该队列由Finalizer线程执行，JVM会触发对象的finalize()方法，并在触发一段时间后，不管有没有执行完成，都停止它。<br>
+GC会在对象执行完finalize()方法后查看有没有和其他引用相连接，如果建立连接，那么GC会停止回收它。这就是第二次标记。如果没有建立连接，那么难逃回收的命运了。</li>
+</ul>
+<p>🍉值得注意的是，一个对象系统只会自动调用一次finalize()，如果执行过一次，第二次就不会自动执行了。</p>
+<p>🍎这个方法毕竟不是C/C++的析构函数，它被设计出来本身就是一种妥协，这个方法代价高昂，而且十分不确定顺序（由于F-queue是新开的一个线程，所以可能导致并发执行的顺序问题），不如使用try-catch-finally，作者建议大家不要使用它。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>5.方法区的GC回收：</p>
+<ul>
+<li>主要是回收废弃常量和无用的类，例如常量池中存在的数据，没有任何对象等于这个数据，下次GC的时候这个常量会被回收。这样就是判断废弃常量的条件。</li>
+<li>那么废弃的类如何判断呢，有三个条件：
+<ul>
+<li>1.该类所有实例已被回收</li>
+<li>2.该类所有的ClassLoader都被回收</li>
+<li>3.无法通过反射访问该类的方法。<br>
+虚拟机可以对满足这些条件的类进行回收，仅仅是可以，而不是一定会。</li>
+<li>🍉大量使用反射，动态代理，jsp等方式要进行类回收，不然永久代可能会溢出。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>2.垃圾收集算法：</p>
+<ul>
+<li>
+<p>1.标记-清除算法：</p>
+<ul>
+<li>最基础的收集算法，先标记，再直接清除。标记部分上面有说过。</li>
+<li>这个算法的不足就是清除后可能剩下很多小空间，没有足够的空间导致分配不了大对象，只能再触发一次GC。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587720959740.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>2.复制算法：</p>
+<ul>
+<li>为了解决上面方法的性能问题，大多数商业虚拟机都使用复制方法。</li>
+<li>这种算法是先将内存划分为两块，每次使用的时候使用其中的一块，当这块内存满了之后，触发GC清理之后将剩余可用对象复制到另外一块上，清理出之前这块内存区域。<br>
+这样可以使空间比较连续，分配起来很方便。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587720987444.png" alt="" loading="lazy"></li>
+<li>🍉研究表明，98%的对象生命周期极短，需要被销毁，所以内存空间不需要按照上面的1:1分配。实际上分配方式是8:1，有一个较大的Eden空间和两个小的Survivor空间，每次使用一个Survivor空间和Eden空间。发生复制的时候将所有存活对象存在另外一块Survivor空间。</li>
+<li>🍉如果发生Survivor空间不足的情况，这个Survivor空间会向JVM申请内存担保，也就是借一些内存来使用。多余出来的对象会直接进入老年代。</li>
+</ul>
+</li>
+<li>
+<p>3.标记-整理算法：</p>
+<ul>
+<li>由于第二种方法在对象存活率较高的时候需要很多复制操作，而且需要很多担保空间。所以需要这种算法</li>
+<li>这种方法可以说是第一种方法的优化，区别在于标记后将存活的整理到一侧，销毁的进行删除。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587721017366.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>4.分代收集：</p>
+<ul>
+<li>
+<p>这种方法可以说和上面的搭配使用，它根据对象的存活周期将Java堆划分为新生代和老年代。<br>
+（新生代中对象死亡率高，老年代中对象存活率高）</p>
+</li>
+<li>
+<p>🍉在新生代中使用复制算法，在老年代中使用标记-整理算法。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>3.HotSpot算法实现：</p>
+<ul>
+<li>
+<p>1.枚举根节点：</p>
+<ul>
+<li>这个算法是可达性分析，由于可达性分析找的根节点（GC Roots）分布在全局性的引用（常量和静态类属性）和执行上下文中，逐个检查开销很大。</li>
+<li>所以在JVM中有一组叫做OopMap的数据结构来计算引用位置，在类加载完成后OopMap就能计算引用。GC在暂停所有线程进行扫描的时候直接扫描OopMap就可以判断哪些是该回收的对象。</li>
+</ul>
+</li>
+<li>
+<p>2.安全点：</p>
+<ul>
+<li>
+<p>上一点的GC根据OopMap进行回收，但是OopMap在程序执行的时候需要动态生成，因为对象或引用会变化，那么如何选取生成方式呢？很显然，OopMap不能每一句都生成一次。</p>
+</li>
+<li>
+<p>🍉安全点（Safepoint）就是生成OopMap的位置，线程只有在安全点才能进行暂停，等待GC的回收。</p>
+</li>
+<li>
+<p>🍉安全点一般在方法调用，循环跳转，异常跳转这种功能指令生成。</p>
+</li>
+<li>
+<p>🍎抢先式中断和主动式中断：</p>
+<ul>
+<li>1.由于线程必须执行到安全点才能进行终止，所以抢先式中断就是在GC发生时将所有线程中断，如果哪个线程没有到达安全点，让它启动，继续跑到安全点再停止。但是现在几乎没有虚拟机实现这种中断。</li>
+<li>2.主动式中断就是各个线程在运行到安全点时，检查此时GC是否在工作，如果在GC要执行了就执行中断。GC在启动时会设置一个标志为真。其他线程读取这个标志就能实现交互。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>3.安全区域（Safe Region）：</p>
+<ul>
+<li>安全点只是保证了在程序执行的时候，很快会进入中断。但如果程序休眠或者中断的时候，安全点就无法保证它的继续中断了。因为线程休眠或中断时并没有为其分配CPU时间，也就无法响应GC。</li>
+<li>🍉安全区域可以看作安全点的扩展，在线程进入安全区域代码的时候和安全点一样，此时GC可以执行。如果GC还没有结束，安全区域内的线程要执行结束，该线程会检查GC过程是否结束，如果结束，它会继续执行，否则等待离开信号。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>4.七大垃圾收集器：<br>
+如果说收集算法是内存回收的方法，那么垃圾收集器就是内存回收的具体实现。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587721144014.png" alt="" loading="lazy"><br>
+上面是新生代区域，下面是老年代区域。</p>
+<ul>
+<li>
+<p>1.Serial收集器：最基本，发展最悠久的收集器</p>
+<ul>
+<li>这是一个单线程收集器，十分传统，新生代的时候使用复制算法，老年代使用标记-整理算法，在这个收集器运行的时候其他用户线程必须被停止。它的停止线程操作对于用户体验非常差，因为会有频繁的卡顿。</li>
+<li>🍉但它也不是一无是处，毕竟简单又高效，停止其他线程，这使得它几乎没有用于线程交互的开销，可以专心进行收集。在新生代中可以使用。</li>
+<li>到现在为止Client模式下默认的新生代收集器还是Serial<br>
+￼<img src="https://wkf1115.github.io/post-images/1587721176137.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>2.ParNew收集器：多线程的Serial收集器</p>
+<ul>
+<li>该线程就是Serial收集器的多线程版本，没有什么创新，但它是Server模式下首选的新生代收集器，因为他可以和CMS收集器进行合作，一个新生代，一个老年代。</li>
+<li>当然，在但CPU的情况下ParNew是不如Serial，因为有线程间的开销，但是一旦CPU数量增加，ParNew就大大的超过Serial。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587721202771.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+<li>
+<p>3.Parallel Scavenge收集器：</p>
+<ul>
+<li>这也是一个新生代收集器，也是采用复制算法，并发收集器。但它的重点和其他收集器都不同，其它收集器都致力于减小用户线程的停顿时间，而这个收集器致力于控制吞吐量。（吞吐量=运行用户代码时间/运行用户代码时间+垃圾收集时间）</li>
+<li>🍉也就是说可以集中控制垃圾收集时间，适用于后台不需要太多的用户交互时使用。</li>
+<li>🍉有三个参数可以修改，一个是控制最大垃圾收集停顿时间，一个是直接设置吞吐量大小，还有一个是开关，开启后GC可以自动根据性能监控动态指定参数，控制吞吐量。</li>
+</ul>
+</li>
+<li>
+<p>4.Serial Old收集器：</p>
+<ul>
+<li>Serial收集器的老年代版本，在老年代上采取标记整理算法。主要用于Client模式下的JVM</li>
+</ul>
+</li>
+<li>
+<p>5.Parallel Old收集器：</p>
+<ul>
+<li>Parallel Scavenge收集器的老年代版本，使用多线程和标记-整理算法。它和Parallel Scavenge收集器搭配可以用于“吞吐量优先的情况”。</li>
+</ul>
+</li>
+<li>
+<p>6.CMS收集器：</p>
+<ul>
+<li>
+<p>这个收集器致力于获取最短回收停顿时间，并发收集，减小响应延迟，所以它主要用于服务端上，能够给用户带来较好的体验。</p>
+</li>
+<li>
+<p>🍉基于标记—清除。分为四个步骤：<br>
+1.初始标记<br>
+2.并发标记<br>
+3.重新标记<br>
+4.并发清除</p>
+<ul>
+<li>
+<p>首先，GC先对GC Roots关联的对象进行一次简单的标记，速度很快，这步骤是初始标记。</p>
+</li>
+<li>
+<p>之后进入并发标记，这段时间内GC进行详细的查找应该被销毁的对象。</p>
+</li>
+<li>
+<p>接下来是重新标记，这段时间GC会整理并发标记期间，用户同时运行产生的对象变动。</p>
+</li>
+<li>
+<p>并发清除就是清除掉销毁对象。</p>
+</li>
+<li>
+<p>🍎初始标记和重新标记是不并发的，这两个过程中其他线程会被暂停，但是CMS将占用时间最多的操作都放在了并发标记和并发清除中，这两个时间内所有线程同时运行，可以大大减少用户的停顿时间。</p>
+</li>
+<li>
+<p>🍉它也有3个明显的缺点：</p>
+<ul>
+<li>
+<p>1.并发阶段虽然不会停顿其他线程，但是由于对CPU资源的占用，应用程序会变慢，总吞吐量降低。<br>
+（如果用户此时cpu资源不太足，GC和用户线程并发的执行会严重缩减用户剩余的CPU资源，导致严重卡顿）。</p>
+</li>
+<li>
+<p>2.无法处理浮动垃圾，在并发阶段时用户还会产生新的垃圾，这部分垃圾没有被标记，只能等待下次GC回收。然而这一部分垃圾也需要占用空间，这就导致了GC不能等老年代内存满了之后再收集，需要预留一些额外空间。如果浮动垃圾溢出，JVM会采用Serial Old来临时处理老年代空间，这就导致大量的开销。</p>
+</li>
+<li>
+<p>3.CMS收集的算法采用的是标记—整理算法，上面也讲过，这会导致大量内存碎片空间，不能存储大型的对象。为了解决这个问题，CMS采用在顶不住碎片空间带来的压力时使用内存碎片整理，但是整理过程其它用户线程必须被暂停，整理过程无法并发。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>7.G1收集器：</p>
+<ul>
+<li>
+<p>首先，G1收集器有如下特点：</p>
+<ul>
+<li>1.回收期间可以使用多CPU通过并发让其他线程依旧运行。</li>
+<li>2.分代收集中的新生代和老年代不再物理隔离，而是概念上的隔离。</li>
+<li>🍉（比CMS好的地方）3.基于标记—整理算法，相比较于标记—清理算法有着更多优势。</li>
+<li>🍉（比CMS好的地方）4.可建立预测停顿时间模型，可以指定回收操作不超过多少毫秒，可以进行规划。<br>
+🍉上面也提到了，G1不再物理隔离新生代和老年代，它将堆划分成了一个个Region，每次根据Region内垃圾价值的大小来选择回收哪个Region。在后台维护一个优先列表储存回收顺序。</li>
+</ul>
+<p>🍎思考问题：化整为零的思想看起来很简单，但是G1是如何保证扫描GC Roots可以分开扫描的？如果整体扫描那么开销变化并不大。（其实上面的划分新生代老年代的收集器也会有这个问题，回收新生代也要扫描老年代，增加开销）。<br>
+🍎解决方案：G1每一个Region有一个Remembered Set，在JVM发现程序对引用类型属性进行写操作时，会在写操作前加上一个写屏障，判断引用类型是否处于不同的Region中（这是G1的分Region情况，在新生代和老年代情况就是检查新老年代对象是否引用了新生代对象），如果是，就把对象信息引用记录添加到其它Region的Remembere Set中。这样在不全堆扫描就内存回收的时候就不会遗漏某些对象了。</p>
+<p>🍉详细过程：初始标记—&gt;并发标记—&gt;最终标记—&gt;筛选回收</p>
+<ul>
+<li>G1的初始标记和并发标记过程和CMS相似。</li>
+<li>最终标记是使用Remembered Set Logs将并发过程中程序变动的对象记录保存在Remembered Set中，这段时间也是要停止用户线程。</li>
+<li>筛选回收过程就是对Remembered Set进行排序。选出回收效率最高的Region。这个过程是可以和用户线程并发的，但效果并不理想。因为只回收一部分Region，回收时间用户可控，所以不如暂停用户线程来提高收集效率。<br>
+￼<img src="https://wkf1115.github.io/post-images/1587721238844.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>5.如何去读GC日志：<br>
+<img src="https://wkf1115.github.io/post-images/1587721270465.png" alt="" loading="lazy"></p>
+<ul>
+<li>一些术语：
+<ul>
+<li>1.GC和Full GC：前面加上Full代表此次GC的停顿类型，是否发生了停止其他线程的（stop-the-world）操作。如果调用System.gc(),那么会显示Full GC(System)。Full GC也代表着老年代GC。</li>
+<li>2.DefNew，Tenured，Perm表示GC发生的区域，DefNew代表Default New Generation。可以看出这些区域是由使用的不同收集器和不同代决定的。</li>
+<li>3.3324k—&gt;152K(3712K)，GC前该内存区域已使用空间—&gt;GC后该内存已使用空间(该内存区域总空间)，后面的3324K—&gt;152K(11904K)代表，GC前Java堆已使用空间—&gt;GC后Java堆已使用空间(java堆总空间)</li>
+<li>4.后面的时间代表GC消耗时间。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>6.内存分配策略：</p>
+<ul>
+<li>
+<p>对象内存分配主要是在新生代的Eden区上分配，如果启动了TLAB，会在TLAB上按照线程优先分配，少数情况下会分配在老年代中。</p>
+</li>
+<li>
+<p>🍉大多数情况下，对象在新生代Eden区中分配，Eden没空间的时候，虚拟机会发起新生代GC（Minor GC）。如果Minor GC还不够空间，会触发分配担保机制，扩大老年代空间并将对象都装入老年区中。</p>
+</li>
+<li>
+<p>🍉大对象直接进入老年代，需要大量连续内存空间来储存的对象会直接进入老年代。</p>
+</li>
+<li>
+<p>🍉长期存活的对象将进入老年代：虚拟机为每个对象都定义了年龄，如果对象能存活到Survivor区域中，并在里面存活一段时间（默认为15岁），那么它就会进入老年代中。<br>
+注：对象年龄的判断是动态的，如果Survivor空间中同年龄的对象占到了Survivor总空间一半以上，那么这个年龄会被设置成阈值，高于此年龄的对象会被保送到老年代。</p>
+</li>
+<li>
+<p>🍉空间分配担保也不是每次都能够成功的，在Survivor空间满了之后，GC会参考历代老年代对象平均对象容量大小，通过这个来判断是否进行Full GC来清理老年代。如果判断失误，强行担保，那么GC在失败后会立刻进行Full GC。</p>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/shen-ru-liao-jie-java-xu-ni-ji-di-yi-zhang-bi-ji/">
+              <h3 class="post-title">
+                深入了解Java虚拟机第一章笔记📒
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://wkf1115.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
