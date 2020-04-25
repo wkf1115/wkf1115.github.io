@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>深入了解Java虚拟机第一章笔记📒 | WKF1115</title>
-<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587723075814">
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587787235470">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="深入了解Java虚拟机第一章笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
@@ -29,7 +29,7 @@ java虚拟机在执行过程中会将内存分为若干数据区域，每个区�
       <div class="main-content">
         <div class="site-header">
   <a href="https://wkf1115.github.io">
-  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587723075814" alt="">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587787235470" alt="">
   </a>
   <h1 class="site-title">
     WKF1115
@@ -89,7 +89,7 @@ java虚拟机在执行过程中会将内存分为若干数据区域，每个区�
                 2020-04-21
               </span>
               <span>
-                9 min read
+                10 min read
               </span>
               
                 <a href="https://wkf1115.github.io/tag/6UuiW32c9/" class="post-tag">
@@ -252,13 +252,13 @@ OutOfMemoryError，虚拟机栈动态扩展时申请不到足够内存。</li>
 <p>2.对象的内存布局：分为三部分</p>
 <ul>
 <li>
-<p>1.对象头（header）包含两个部分：储存对象自身的运行时数据（Mark Word）和类型指针</p>
+<p>1.对象头（header）包含两个部分：储存对象自身的运行时数据（Mark Word）和类型指针，一共12个字节</p>
 <ul>
 <li>
 <p>🍉储存对象自身的运行时数据（Mark Word）：哈希码，GC分代年龄，锁状态标志，线程持有的锁，偏向线程ID，偏向时间戳。这个数据长度分别为32bit和64bit，虽然长度固定，但是由于需要在尽可能小的地方储存信息，所以它的结构不确定，会被JVM进行调整。</p>
 </li>
 <li>
-<p>🍉类型指针，指向它类元数据的指针，这个可以确定该对象是哪个类的实例。<br>
+<p>🍉类型指针，指向它类元数据的指针，这个可以确定该对象是哪个类的实例。它固定4个字节。<br>
 （如果是一个Java数组，那么对象头中必须有一块用于记录数组长度的数据，因为数组元数据无法确定数组大小）</p>
 </li>
 </ul>
