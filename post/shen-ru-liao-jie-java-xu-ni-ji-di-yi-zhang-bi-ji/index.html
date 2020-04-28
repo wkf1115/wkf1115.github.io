@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>深入了解Java虚拟机第一章笔记📒 | WKF1115</title>
-<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1587787550398">
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588045814537">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="深入了解Java虚拟机第一章笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
@@ -29,13 +29,13 @@ java虚拟机在执行过程中会将内存分为若干数据区域，每个区�
       <div class="main-content">
         <div class="site-header">
   <a href="https://wkf1115.github.io">
-  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1587787550398" alt="">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588045814537" alt="">
   </a>
   <h1 class="site-title">
     WKF1115
   </h1>
   <p class="site-description">
-    人若是看透自己，就不会小看别人。
+    平时多学习，编码少着急。
   </p>
   <div class="menu-container">
     
@@ -277,6 +277,10 @@ OutOfMemoryError，虚拟机栈动态扩展时申请不到足够内存。</li>
 </ul>
 </li>
 </ul>
+</li>
+<li>
+<pre><code>  eg：这里补充一个小例子：一个User对象（两个成员变量，一个int，一个String）它的对象内存布局为：8字节对象头+4字节类型指针+8字节实例数据（4字节int+4字节String）+4字节对齐=24字节。
+</code></pre>
 </li>
 <li>
 <p>3.对象的访问定位：</p>

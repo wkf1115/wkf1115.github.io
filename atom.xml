@@ -2,11 +2,11 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://wkf1115.github.io</id>
     <title>WKF1115</title>
-    <updated>2020-04-25T04:05:52.269Z</updated>
+    <updated>2020-04-28T03:50:16.543Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://wkf1115.github.io"/>
     <link rel="self" href="https://wkf1115.github.io/atom.xml"/>
-    <subtitle>人若是看透自己，就不会小看别人。</subtitle>
+    <subtitle>平时多学习，编码少着急。</subtitle>
     <logo>https://wkf1115.github.io/images/avatar.png</logo>
     <icon>https://wkf1115.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, WKF1115</rights>
@@ -326,8 +326,11 @@ GC会在对象执行完finalize()方法后查看有没有和其他引用相连�
 <p>🍉大对象直接进入老年代，需要大量连续内存空间来储存的对象会直接进入老年代。</p>
 </li>
 <li>
-<p>🍉长期存活的对象将进入老年代：虚拟机为每个对象都定义了年龄，如果对象能存活到Survivor区域中，并在里面存活一段时间（默认为15岁），那么它就会进入老年代中。<br>
-注：对象年龄的判断是动态的，如果Survivor空间中同年龄的对象占到了Survivor总空间一半以上，那么这个年龄会被设置成阈值，高于此年龄的对象会被保送到老年代。</p>
+<p>🍉长期存活的对象将进入老年代：虚拟机为每个对象都定义了年龄，如果对象能存活到Survivor区域中，并在里面存活一段时间（默认为15岁），那么它就会进入老年代中。</p>
+<ul>
+<li>注1: 分代年龄最大为15岁，因为分代年龄在对象中占4个bit。代表1111是15。</li>
+<li>注2：对象年龄的判断是动态的，如果Survivor空间中同年龄的对象占到了Survivor总空间一半以上，那么这个年龄会被设置成阈值，高于此年龄的对象会被保送到老年代。</li>
+</ul>
 </li>
 <li>
 <p>🍉空间分配担保也不是每次都能够成功的，在Survivor空间满了之后，GC会参考历代老年代对象平均对象容量大小，通过这个来判断是否进行Full GC来清理老年代。如果判断失误，强行担保，那么GC在失败后会立刻进行Full GC。</p>
@@ -520,6 +523,10 @@ OutOfMemoryError，虚拟机栈动态扩展时申请不到足够内存。</li>
 </ul>
 </li>
 </ul>
+</li>
+<li>
+<pre><code>  eg：这里补充一个小例子：一个User对象（两个成员变量，一个int，一个String）它的对象内存布局为：8字节对象头+4字节类型指针+8字节实例数据（4字节int+4字节String）+4字节对齐=24字节。
+</code></pre>
 </li>
 <li>
 <p>3.对象的访问定位：</p>
