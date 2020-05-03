@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://wkf1115.github.io</id>
     <title>WKF1115</title>
-    <updated>2020-04-28T03:50:16.543Z</updated>
+    <updated>2020-05-03T03:47:44.721Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://wkf1115.github.io"/>
     <link rel="self" href="https://wkf1115.github.io/atom.xml"/>
@@ -10,6 +10,16 @@
     <logo>https://wkf1115.github.io/images/avatar.png</logo>
     <icon>https://wkf1115.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, WKF1115</rights>
+    <entry>
+        <title type="html"><![CDATA[JVM学习小随笔📓]]></title>
+        <id>https://wkf1115.github.io/post/jvm-xue-xi-xiao-sui-bi/</id>
+        <link href="https://wkf1115.github.io/post/jvm-xue-xi-xiao-sui-bi/">
+        </link>
+        <updated>2020-04-29T04:06:20.000Z</updated>
+        <content type="html"><![CDATA[<p><img src="https://wkf1115.github.io/post-images/1588133206825.png" alt="" loading="lazy"><br>
+一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）栈（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[深入了解Java虚拟机第二章笔记📒]]></title>
         <id>https://wkf1115.github.io/post/shen-ru-liao-jie-java-xu-ni-ji-di-er-zhang-bi-ji/</id>
@@ -413,26 +423,27 @@ OutOfMemoryError，虚拟机栈动态扩展时申请不到足够内存。</li>
 </li>
 <li>
 <p>6.和虚拟机栈一样，如果扩展时内存不足，会报OutOfMemoryError异常。</p>
-<ul>
+</li>
+</ul>
+</li>
 <li>
-<p>🍑.方法区：堆的一部分</p>
+<p>5.方法区：</p>
 <ul>
 <li>
 <p>1.作用就是储存类信息，常量，静态变量这种编译期就被加载的值。</p>
 </li>
 <li>
 <p>2.它和堆一样，被所有线程共享。</p>
-<p>🍉java虚拟机规范将其描述为堆的一个逻辑部分，换句话说，它是堆的一部分。</p>
+<pre><code>  	🍉java虚拟机规范将其描述为堆的一个逻辑部分。但是它应该与堆区分开来
+</code></pre>
 </li>
 <li>
 <p>3.这部分的区域不是很容易被GC回收，虽然GC也掌管这片区域。</p>
-</li>
+<ul>
 <li>
 <p>🍑.运行时常量池：方法区的一部分</p>
 <ul>
 <li>存放编译期生成的各种字面量和符号引用。它相比较于Class文件常量池的另外一个特征就是具备动态性。</li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>

@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>深入了解Java虚拟机第一章笔记📒 | WKF1115</title>
-<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588045814537">
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588477662892">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="深入了解Java虚拟机第一章笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
@@ -29,7 +29,7 @@ java虚拟机在执行过程中会将内存分为若干数据区域，每个区�
       <div class="main-content">
         <div class="site-header">
   <a href="https://wkf1115.github.io">
-  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588045814537" alt="">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588477662892" alt="">
   </a>
   <h1 class="site-title">
     WKF1115
@@ -167,26 +167,27 @@ OutOfMemoryError，虚拟机栈动态扩展时申请不到足够内存。</li>
 </li>
 <li>
 <p>6.和虚拟机栈一样，如果扩展时内存不足，会报OutOfMemoryError异常。</p>
-<ul>
+</li>
+</ul>
+</li>
 <li>
-<p>🍑.方法区：堆的一部分</p>
+<p>5.方法区：</p>
 <ul>
 <li>
 <p>1.作用就是储存类信息，常量，静态变量这种编译期就被加载的值。</p>
 </li>
 <li>
 <p>2.它和堆一样，被所有线程共享。</p>
-<p>🍉java虚拟机规范将其描述为堆的一个逻辑部分，换句话说，它是堆的一部分。</p>
+<pre><code>  	🍉java虚拟机规范将其描述为堆的一个逻辑部分。但是它应该与堆区分开来
+</code></pre>
 </li>
 <li>
 <p>3.这部分的区域不是很容易被GC回收，虽然GC也掌管这片区域。</p>
-</li>
+<ul>
 <li>
 <p>🍑.运行时常量池：方法区的一部分</p>
 <ul>
 <li>存放编译期生成的各种字面量和符号引用。它相比较于Class文件常量池的另外一个特征就是具备动态性。</li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>

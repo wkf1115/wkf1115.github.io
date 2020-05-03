@@ -2,25 +2,19 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Java并发编程艺术第一章学习笔记📒 | WKF1115</title>
+<title>JVM学习小随笔📓 | WKF1115</title>
 <link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588477662892">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Java并发编程艺术第一章学习笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="JVM学习小随笔📓 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="第一章：关于多线程的简单介绍
-1.多线程中并发执行不一定比串行执行更快，当并发执行累加操作不超过百万次时，速度会比串行执行累加操作要慢。
-
-
-造成这个情况因为线程有创建和上下文切换的开销。
-
-
-解决这个情况的方法有
-1.无锁并发编程：比如通..." />
-    <meta name="keywords" content="Java并发编程的艺术" />
+    <meta name="description" content="
+一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）栈（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。
+..." />
+    <meta name="keywords" content="Java随笔" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -82,53 +76,26 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Java并发编程艺术第一章学习笔记📒
+              JVM学习小随笔📓
             </h2>
             <div class="post-info">
               <span>
-                2020-04-21
+                2020-04-29
               </span>
               <span>
-                2 min read
+                1 min read
               </span>
               
-                <a href="https://wkf1115.github.io/tag/java/syvo/" class="post-tag">
-                  # Java并发编程的艺术
+                <a href="https://wkf1115.github.io/tag/eS0DJf6rp/" class="post-tag">
+                  # Java随笔
                 </a>
               
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>第一章：关于多线程的简单介绍</p>
-<p>1.多线程中并发执行不一定比串行执行更快，当并发执行累加操作不超过百万次时，速度会比串行执行累加操作要慢。</p>
-<ul>
-<li>
-<p>造成这个情况因为线程有创建和上下文切换的开销。</p>
-</li>
-<li>
-<p>解决这个情况的方法有<br>
-1.无锁并发编程：比如通过数据的ID按照Hash算法分段，不同的线程处理不同的数据，来避免使用锁。<br>
-2.CAS算法<br>
-3.协程：在单线程中实现多任务的调度。在单线程中维持多个任务间的切换</p>
-</li>
-</ul>
-<p>2.死锁：</p>
-<ul>
-<li>
-<p>经典的例子：例如1线程运行在加A锁的方法中调用加B锁的方法，2线程运行在加B锁的方法中调用加A锁的方法，这会引起两个线程互相等待对方释放锁。</p>
-</li>
-<li>
-<p>死锁的核心问题：但在现实中这样的代码不常见，更为常见的情况是1线程拿到锁后因为一些异常（死循环）没有释放掉锁。此时也会引起死锁。归根结底是对锁释放的错误。</p>
-<ul>
-<li>避免死锁的方法：<br>
-1.避免一个线程同时获取多个锁<br>
-2.一锁一资源，一一对应。尽量不要一对多和多对一。<br>
-3.使用定时锁来替代实体锁机制。<br>
-4.数据库锁中加锁和解锁必须在一个数据库连接里。</li>
-</ul>
-</li>
-</ul>
+                <p><img src="https://wkf1115.github.io/post-images/1588133206825.png" alt="" loading="lazy"><br>
+一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）栈（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。</p>
 
               </div>
               <div class="toc-container">
@@ -138,6 +105,15 @@
           </article>
         </div>
 
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/shen-ru-liao-jie-java-xu-ni-ji-di-er-zhang-bi-ji/">
+              <h3 class="post-title">
+                深入了解Java虚拟机第二章笔记📒
+              </h3>
+            </a>
+          </div>
         
 
         
