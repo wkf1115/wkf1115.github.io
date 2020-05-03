@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JVM学习小随笔📓 | WKF1115</title>
-<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588477662892">
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588478342812">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="JVM学习小随笔📓 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
@@ -12,8 +12,14 @@
 
 
     <meta name="description" content="
-一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）栈（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。
-..." />
+一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）线程（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。
+1.class文件的结构：
+
+
+魔数和class版本号
+
+
+常量池（..." />
     <meta name="keywords" content="Java随笔" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
@@ -23,7 +29,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://wkf1115.github.io">
-  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588477662892" alt="">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588478342812" alt="">
   </a>
   <h1 class="site-title">
     WKF1115
@@ -83,7 +89,7 @@
                 2020-04-29
               </span>
               <span>
-                1 min read
+                5 min read
               </span>
               
                 <a href="https://wkf1115.github.io/tag/eS0DJf6rp/" class="post-tag">
@@ -95,7 +101,107 @@
             <div class="post-content-wrapper">
               <div class="post-content">
                 <p><img src="https://wkf1115.github.io/post-images/1588133206825.png" alt="" loading="lazy"><br>
-一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）栈（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。</p>
+一图流解释JVM结构：类加载，运行时数据区（堆（常量池 静态变量）线程（本地方法栈 JavaVM栈 程序计数器）方法区（类信息 code编译代码）），JMM，直接内存。</p>
+<p>1.class文件的结构：</p>
+<ul>
+<li>
+<p>魔数和class版本号</p>
+</li>
+<li>
+<p>常量池（最大的区域，变量属性类型名称，方法的属性类型名称）</p>
+</li>
+<li>
+<p>访问标志（表示这个类是class还是接口，public还是private，是否是final）</p>
+</li>
+<li>
+<p>类索引，父类索引，接口索引（表示这个类的继承关系）</p>
+</li>
+<li>
+<p>字段表属性（表示字段（属性）是public还是啥，是static还是啥，是final还是啥，是什么数据类型）</p>
+</li>
+<li>
+<p>方法表属性（和字段表类似，只不过是形容方法的）</p>
+</li>
+<li>
+<p>属性表属性（描述上两个表中特殊属性，比如code）</p>
+</li>
+<li>
+<p>🍉结构结论：开始先来个class文件的描述，接下来是最大的储存仓库，基本上所有实体名称属性都在里面，之后是描述类的属性，描述字段的属性，描述方法的属性。</p>
+</li>
+<li>
+<p>🍉究极简化：描述——&gt;仓库——&gt;类字段方法属性<br>
+（读取后面类字段方法的时候在最后只能读取一个属性，作用域啥的，要想读到实体的东西都要去仓库（常量池）中找）</p>
+</li>
+</ul>
+<p>2.类生命周期中的加载过程：</p>
+<ul>
+<li>在加载过程中，class文件会被jvm识别，将读取到的class加载到堆中并创建一个对象。作为方法区中的使用入口。<br>
+（类加载不是一下就将所有类都装载的，如果这个类没有被使用，JVM就不会加载它，如果JVM发现类中间存在错误，就会报错）</li>
+</ul>
+<p>3.类生命周期中的连接过程：</p>
+<ul>
+<li>
+<p>验证过程：连接阶段第一步，验证class文件的格式是否正确，语义是否完整，会不会危害JVM安全之类的</p>
+</li>
+<li>
+<p>准备过程：为类变量分配内存并初始化（给默认值）</p>
+</li>
+<li>
+<p>解析过程：在Java文件编译为class文件的时候，引用会被替换为符号引用，代指真正的地址。解析过程就是将符号引用转为直接引用的过程。</p>
+</li>
+</ul>
+<p>4.类生命周期的初始化过程：</p>
+<ul>
+<li>为刚刚准备过程中的静态变量赋于正确的初始值。</li>
+</ul>
+<p>5.使用过程：</p>
+<ul>
+<li>方法区中保存着类信息，堆中保存类实例</li>
+</ul>
+<p>6.之后就是卸载了，JVM停止之后类的信息会被卸载掉</p>
+<p>🍉类生命周期总结：类加载（将十六进制class文件载入方法区和堆，堆中保存一个实例）—&gt;验证（检查是否正确）—&gt;准备(分配内存初始化)——&gt;解析(把符号引用解析为直接引用)—&gt;初始化(赋正确的初值)—&gt;使用—&gt;卸载</p>
+<p>🍉小结：载入方法区和堆（类加载），检查初始化不能少（验证，准备），再把引用替换好（解析），正确初始完成好，使用灭亡结束早，一个类就over了。</p>
+<p>7.类加载器有三种：</p>
+<ul>
+<li>
+<p>启动类加载器（Bootstrap ClassLoader）：加载jre/lib目录下的类库，不能被java程序引用，是使用C++实现的，是JVM的一部分。</p>
+</li>
+<li>
+<p>扩展类加载器（Extension ClassLoader）：加载jre/lib/ext目录中的类库，比如javax.*，java程序可以调用扩展类加载器</p>
+</li>
+<li>
+<p>应用程序类加载器（Application ClassLoader）：加载用户类路径的类，一般情况下它是默认的类加载器。</p>
+</li>
+</ul>
+<p>🍉扩展和应用程序加载器都继承于java.lang.ClassLoader。所以更像一个类加载器。启动类加载器将下面两个类加载器加载后，它们才能加载别的类。</p>
+<p>8.类加载可以三种方式：</p>
+<ul>
+<li>
+<p>命令行启动时由JVM初始化</p>
+</li>
+<li>
+<p>Class.forName():不止将.class文件加载到jvm中，还会进行解释，效果就是会执行类中static块</p>
+</li>
+<li>
+<p>ClassLoader.loadClass():只会加载.class文件至jvm中，不会执行static中的内容，只用在newInstance才会执行。</p>
+</li>
+</ul>
+<p>9.JVM类加载机制：</p>
+<p>全盘负责，父类委托，缓存机制，双亲委派机制。</p>
+<ul>
+<li>
+<p>全盘负责就是自己的类自己的类加载器加载，不让其他的类加载器去管。</p>
+</li>
+<li>
+<p>父类委托就是让父类加载器先加载，加载不了自己再加载。</p>
+</li>
+<li>
+<p>缓存机制就是加载过后的class文件都会被缓存，以后优先去缓存区中寻找Class。</p>
+</li>
+<li>
+<p>双亲委派就是强化版的父类委托，一层一层的向上提交任务。优势就是防止内存中出现多份同样的字节码。</p>
+</li>
+</ul>
 
               </div>
               <div class="toc-container">
