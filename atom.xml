@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://wkf1115.github.io</id>
     <title>WKF1115</title>
-    <updated>2020-05-03T03:59:06.229Z</updated>
+    <updated>2020-05-08T11:45:24.303Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://wkf1115.github.io"/>
     <link rel="self" href="https://wkf1115.github.io/atom.xml"/>
@@ -10,6 +10,115 @@
     <logo>https://wkf1115.github.io/images/avatar.png</logo>
     <icon>https://wkf1115.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, WKF1115</rights>
+    <entry>
+        <title type="html"><![CDATA[Java并发编程艺术第五章学习笔记📒]]></title>
+        <id>https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-wu-zhang-xue-xi-bi-ji/</id>
+        <link href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-wu-zhang-xue-xi-bi-ji/">
+        </link>
+        <updated>2020-05-08T11:35:54.000Z</updated>
+        <content type="html"><![CDATA[<p>第五章：Java中的锁：</p>
+<p>1.Lock接口：</p>
+<ul>
+<li>
+<p>它提供的功能与sunchronized关键字类似，只不过它可以在使用时显示地获取和释放锁。<br>
+Lock lock = new ReentrantLock();<br>
+lock.lock();<br>
+try {<br>
+} finally {<br>
+lock.unlock();<br>
+}</p>
+</li>
+<li>
+<p>🍉它具有synchronized关键字不具备的特性：</p>
+</li>
+<li>
+<p>1.可以非阻塞的获取锁（boolean tryLock），被synchronize修饰的方法在一个线程执行的时候其他线程都会等待锁的释放（阻塞的获取锁），这样会导致开销很大。tryLock可以立刻判断能否获得锁。</p>
+</li>
+<li>
+<p>2.能被中断的获取锁（void lockInterruptibly（）），正在获取锁的线程被中断的时候可以立刻抛出异常并且释放锁。</p>
+</li>
+<li>
+<p>3.可以指定花费多少时间来获取锁（boolean tryLock（long time,TimeUnit unit）），如果超时就不获取了。</p>
+</li>
+</ul>
+<p>2.队列同步器AQS：</p>
+<ul>
+<li>
+<p>AQS是用来构建锁或者其他同步组件的基础框架，使用一个int成员变量来表示同步状态。通过内置的FIFO队列完成线程获取排队。</p>
+</li>
+<li>
+<p>🍉使用方式：主要是继承，子类通过继承AQS来实现它的抽象方法。在实现过程中如果要对同步状态进行查询或者修改，就要使用ASQ的三个基础方法（getState()、setState(int newState)和compareAndSetState(int expect,int update)<br>
+）这三个方法可以保证线程安全。</p>
+</li>
+<li>
+<p>🍉同步器是实现锁的关键：</p>
+</li>
+<li>
+<p>1.锁是面向使用者的，锁定义了使用者与锁交互的接口，隐藏了实现细节。</p>
+</li>
+<li>
+<p>2.同步器面向锁的实现者，简化了锁的实现方式，它掌控了同步状态管理，线程排队，等待与唤醒的底层操作。屏蔽了底层的复杂操作。</p>
+</li>
+<li>
+<ol>
+<li>AQS的接口与示例：</li>
+</ol>
+<ul>
+<li>上面讲过，AQS本身是个模版，提供一些抽象方法。具体实现类继承AQS之后需要使用三个方法来设定同步的状态（这三个方法是设定好的，不需要重写）：
+<ul>
+<li>
+<p>1.getState():获取当前同步状态。</p>
+</li>
+<li>
+<p>2.setState(int newState):设置当前同步状态。</p>
+</li>
+<li>
+<p>3.compareAndSetState(int expect,int update):使用CAS设置当前状态，该方法能够保证状态设置的原子性。</p>
+</li>
+<li>
+<p>🍉而同步器可以被重写的方法分为独占式和共享式：</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://wkf1115.github.io/post-images/1588938048081.png" alt="" loading="lazy"></figure>
+<ul>
+<li>
+<p>🍉同步器也提供了一些模版方法：<br>
+<img src="https://wkf1115.github.io/post-images/1588938059427.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>基本分为三类：1.独占式获取与释放同步状态，2.共享式获取与释放同步状态和3.查询同步队列中的等待线程情况。</p>
+<ul>
+<li>独占锁就是在同一时刻只能有一个线程获取到锁，而其他获取锁的线程只能处于同步队列中等待。</li>
+<li>🍉例子：AQS里面有一个独占锁实现类，它通过state表示线程占用状态，通过CAS设置同步状态。可以看出 用户使用显式锁的时候不需要直接操作AQS，操作实现类即可。</li>
+</ul>
+</li>
+<li>
+<p>2.AQS的实现分析：</p>
+<ul>
+<li>
+<p>1.同步队列：</p>
+<ul>
+<li>AQS依赖同步队列（FIFO双向队列）来完成同步状态的管理。</li>
+<li>🍉当前线程获取同步状态失败的时候，同步器会将当前线程以及等待状态信息构造为一个节点加入同步队列中，同时线程会被阻塞。同步状态释放时，会把首节点线程唤醒，尝试再次获取同步状态。<br>
+<img src="https://wkf1115.github.io/post-images/1588938202596.png" alt="" loading="lazy"></li>
+<li>同步器拥有首节点和尾节点。<br>
+<img src="https://wkf1115.github.io/post-images/1588938217248.png" alt="" loading="lazy"><br>
+<img src="https://wkf1115.github.io/post-images/1588938226368.png" alt="" loading="lazy"></li>
+<li>🍉尾节点的插入需要使用CAS，头节点出队则不需要，因为同时只会有一个线程获取到同步状态。</li>
+</ul>
+</li>
+<li>
+<p>2.独占式同步状态获取与释放：</p>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[JVM学习小随笔📓]]></title>
         <id>https://wkf1115.github.io/post/jvm-xue-xi-xiao-sui-bi/</id>
@@ -704,82 +813,207 @@ Java堆中划分一片区域作为句柄池，引用类型指向句柄池中的�
 <pre><code>实际上JAVA天生是一个多线程语言，在运行mian方法的时候就会执行多个线程。多线程带来了许多好处，更多的处理器核心，更快的响应时间，更好的编程模型。
 </code></pre>
 <p>1.线程优先级：</p>
-<pre><code>    现代操作系统分配内存时会分出一个个时间片，每一个线程使用不等数量的时间片，线程时间片用完了就会发生线程调度。
-
-    线程优先级就是线程需要多少处理器的资源。
-
-    首先Java线程是通过一个名字叫做priority的整形成员变量来控制优先级，优先级的范围是1～10。
-    可以通过setPriority(int)方法设置优先级，默认优先级是5，优先级高的线程时间片要多于低的。
-
-    🍉频繁阻塞（休眠或者I/O操作）的线程需要设置较高的优先级，偏重计算（需要较多cpu时间或者偏运算）的线程需要较低的优先级。
-    🍉这样可以避免cpu资源被偏重计算的线程独占。
-    
-    🍎线程优先性的设置，在很多实际jvm环境中都不会生效，所以这条仅供参考。
-</code></pre>
+<ul>
+<li>
+<p>现代操作系统分配内存时会分出一个个时间片，每一个线程使用不等数量的时间片，线程时间片用完了就会发生线程调度。</p>
+</li>
+<li>
+<p>线程优先级就是线程需要多少处理器的资源。</p>
+</li>
+<li>
+<p>首先Java线程是通过一个名字叫做priority的整形成员变量来控制优先级，优先级的范围是1～10。</p>
+</li>
+<li>
+<p>可以通过setPriority(int)方法设置优先级，默认优先级是5，优先级高的线程时间片要多于低的。</p>
+</li>
+<li>
+<p>🍉频繁阻塞（休眠或者I/O操作）的线程需要设置较高的优先级，偏重计算（需要较多cpu时间或者偏运算）的线程需要较低的优先级。</p>
+</li>
+<li>
+<p>🍉这样可以避免cpu资源被偏重计算的线程独占。</p>
+</li>
+<li>
+<p>🍎线程优先性的设置，在很多实际jvm环境中都不会生效，所以这条仅供参考。</p>
+</li>
+</ul>
 <p>2.线程的状态：</p>
-<pre><code>    线程在生命周期中有6种状态：
-        
-        1.NEW：初始状态，线程刚刚被构建，还没有调用start()方法。
-        
-        2.RUNNABLE：运行状态，操作系统的就绪和运行两种状态都被称作运行状态。
-        
-        3.BLOCKED：阻塞状态，表示被锁阻塞。
-
-        4.WAITING：等待状态，表示该线程需要其它线程作出一些特定动作。
-        
-        5.TIME_WAITING：超时等待，不同于WAITING，他可以在指定时间内自行返回。
-
-        6.TERMINATED：终止状态，线程执行完毕。
-    
-    线程的运行流程：线程创建后会调用start()方法开始运行，线程执行wait()方法后，线程会进入等待状态。等待状态需要其他线程的通知才能变回运行状态，
-                    超时等待时间到达将会返回到运行状态，线程在没有获取锁的时候会进入阻塞状态，线程在执行Runnable的run()方法后会进入终止状态。
-</code></pre>
+<ul>
+<li>
+<p>线程在生命周期中有6种状态：</p>
+<ul>
+<li>
+<p>1.NEW：初始状态，线程刚刚被构建，还没有调用start()方法。</p>
+</li>
+<li>
+<p>2.RUNNABLE：运行状态，操作系统的就绪和运行两种状态都被称作运行状态。</p>
+</li>
+<li>
+<p>3.BLOCKED：阻塞状态，表示被锁阻塞。</p>
+</li>
+<li>
+<p>4.WAITING：等待状态，表示该线程需要其它线程作出一些特定动作。</p>
+</li>
+<li>
+<p>5.TIME_WAITING：超时等待，不同于WAITING，他可以在指定时间内自行返回。</p>
+</li>
+<li>
+<p>6.TERMINATED：终止状态，线程执行完毕。</p>
+<ul>
+<li>线程的运行流程：线程创建后会调用start()方法开始运行，线程执行wait()方法后，线程会进入等待状态。等待状态需要其他线程的通知才能变回运行状态，</li>
+<li>超时等待时间到达将会返回到运行状态，线程在没有获取锁的时候会进入阻塞状态，线程在执行Runnable的run()方法后会进入终止状态。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <p>3.Daemon线程：</p>
-<pre><code>        🍉Daemon线程主要用于支持程序后台调度和支持性工作，当JVM中不存在非Daemon线程的时候，JVM会退出。
-</code></pre>
+<ul>
+<li>🍉Daemon线程主要用于支持程序后台调度和支持性工作，当JVM中不存在非Daemon线程的时候，JVM会退出。</li>
+</ul>
 <p>4.线程的创建：</p>
-<pre><code>        一个新线程的构造是由其parent线程进行空间分配的，它继承了parent线程是否为Daemon，优先级，加载资源的contextClassLoader还有可继承的ThreadLocal，
-        这个线程还会有唯一的ID。
-        
-        创建结束之后调用start()方法就可以启动线程，只要线程规划器空闲，应该立即启动该线程。
-</code></pre>
+<ul>
+<li>
+<p>一个新线程的构造是由其parent线程进行空间分配的，它继承了parent线程是否为Daemon，优先级，加载资源的contextClassLoader还有可继承的ThreadLocal，这个线程还会有唯一的ID。</p>
+</li>
+<li>
+<p>创建结束之后调用start()方法就可以启动线程，只要线程规划器空闲，应该立即启动该线程。</p>
+</li>
+</ul>
 <p>5.线程的终止：</p>
-<pre><code>        线程的中断操作可以作为一种简便的线程间交互方式，同时也可在线程内设置变量来控制线程的终止。
-</code></pre>
+<ul>
+<li>线程的中断操作可以作为一种简便的线程间交互方式，同时也可在线程内设置变量来控制线程的终止。</li>
+</ul>
 <p>6.synchronized的方式：</p>
-<pre><code>        任意线程对Object的访问需要经过它的Monitor（监视器），线程首先对监视器执行Monitor.Enter()方法，如果Enter失败，线程会进入一个同步队列。
-        线程在释放锁的时候，会执行Monitor.exit()方法，同步队列检测到exit方法被调用时，队头的线程会执行出队操作并执行Monitor.Enter()方法。
-</code></pre>
+<ul>
+<li>任意线程对Object的访问需要经过它的Monitor（监视器），线程首先对监视器执行Monitor.Enter()方法，如果Enter失败，线程会进入一个同步队列。</li>
+<li>线程在释放锁的时候，会执行Monitor.exit()方法，同步队列检测到exit方法被调用时，队头的线程会执行出队操作并执行Monitor.Enter()方法。</li>
+</ul>
 <p>7.wait()和notify()：</p>
-<pre><code>        1.wait()和notify(),notifyAll()在调用时需要给先获取到锁。
-        
-        2.调用wait()方法后，线程状态变为waiting，并加入到同步队列中。
-    
-        3.notify调用后，线程不会立即从wait返回，需要调用notify的线程释放锁后，wait线程获取到锁，才有可能返回。
-            🍉（notify方法将一个wait线程从等待队列中移到同步队列中，notifyAll将等待队列中全部的线程都移到同步队列，被移动的线程由waiting变为blocked状态）
-￼
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://wkf1115.github.io/post-images/1587460118713.png" alt="" loading="lazy"></figure>
+<ul>
+<li>
+<p>1.wait()和notify(),notifyAll()在调用时需要给先获取到锁。</p>
+</li>
+<li>
+<p>2.调用wait()方法后，线程状态变为waiting，并加入到同步队列中。</p>
+</li>
+<li>
+<p>3.notify调用后，线程不会立即从wait返回，需要调用notify的线程释放锁后，wait线程获取到锁，才有可能返回。</p>
+</li>
+<li>
+<p>🍉（notify方法将一个wait线程从等待队列中移到同步队列中，notifyAll将等待队列中全部的线程都移到同步队列，被移动的线程由waiting变为blocked状态）<br>
+￼<br>
+<img src="https://wkf1115.github.io/post-images/1587460118713.png" alt="" loading="lazy"></p>
+</li>
+</ul>
 <p>8.等待/通知的经典范式：</p>
-<pre><code>        等待方：
-        
-            1.获取对象的锁
-            2.如果条件不满足，调用对象的wait()方法，如果条件满足停止wait()
-        
-        通知方：
-            
-            1.获得对象的锁
-            2.改变条件
-            3.通知所有等待的线程
-</code></pre>
+<ul>
+<li>
+<p>等待方：</p>
+<ul>
+<li>1.获取对象的锁</li>
+<li>2.如果条件不满足，调用对象的wait()方法，如果条件满足停止wait()</li>
+</ul>
+</li>
+<li>
+<p>通知方：</p>
+<ul>
+<li>1.获得对象的锁</li>
+<li>2.改变条件</li>
+<li>3.通知所有等待的线程</li>
+</ul>
+</li>
+</ul>
 <p>9.thread.join()的使用：</p>
-<pre><code>        如果一个线程A执行了B.join()语句，那么A等待B线程结束之后才会从B.join()返回（继续执行）。
-        从源码角度来看，join()的实现使用了等待/通知的经典范式—加锁，循环，和处理逻辑，只不过条件变为了线程是否活着。
-</code></pre>
+<ul>
+<li>如果一个线程A执行了B.join()语句，那么A等待B线程结束之后才会从B.join()返回（继续执行）。</li>
+<li>从源码角度来看，join()的实现使用了等待/通知的经典范式—加锁，循环，和处理逻辑，只不过条件变为了线程是否活着。</li>
+</ul>
 <p>10.ThreadLocal的使用：</p>
-<pre><code>        ThreadLocal是线程变量，是以ThreadLocal对象为键，任意对象为值的储存结构。这个结构是附带在线程上的。也就是一个线程可以根据一个ThreadLocal对象查询				该线程的某些信息。
-
-        springAOP中可以用到此类方法。因为这个变量可以将方法拆分开，中间插入其他方法，通过变量来传递信息。</code></pre>
+<ul>
+<li>
+<p>ThreadLocal是线程变量，是以ThreadLocal对象为键，任意对象为值的储存结构。这个结构是附带在线程上的。也就是一个线程可以根据一个ThreadLocal对象查询				该线程的某些信息。</p>
+</li>
+<li>
+<p>springAOP中可以用到此类方法。因为这个变量可以将方法拆分开，中间插入其他方法，通过变量来传递信息。</p>
+</li>
+</ul>
+<p>11.线程应用实例：等待超时模式：</p>
+<pre><code>		// 对当前对象加锁
+		public synchronized Object get(long mills) throws InterruptedException { 
+				long future = System.currentTimeMillis() + mills; 
+				long remaining = mills;					// 当超时大于0并且result返回值不满足要求					while ((result == null) &amp;&amp; remaining &gt; 0) { 
+					wait(remaining);
+					remaining = future - System.currentTimeMillis(); 
+				}
+					return result; 
+		}
+</code></pre>
+<ul>
+<li>可以看出，等待超时模式在原来的等待/通知范式基础上增加了超时控制。这样即使方法执行时间过长，也不会永久阻塞调用者。而回按时返回。</li>
+</ul>
+<p>12.一个简单的数据库连接池示例：</p>
+<ul>
+<li>
+<p>连接池通过构造函数初始化最大上限，通过双向队列来维护连接。</p>
+</li>
+<li>
+<p>1.连接池ConnectionPool：</p>
+<ul>
+<li>
+<p>1.构造方法，表示次连接池能够容纳多少连接。</p>
+</li>
+<li>
+<p>2.归还连接方法，pool将传入的连接放回队列，并通知其他连接。</p>
+</li>
+<li>
+<p>3.获取连接方法，判断传入时间参数，不停使线程wait(),判断传入时间过了多久（通过上面的等待超时模式），直到时间到了，返回连接池的第一个连接。如果超时直接返回null/连接。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>2.模拟连接ConnectionDriver：</p>
+<ul>
+<li>
+<p>代表连接池中连接自身。再模拟一点点延时（线程休眠）。</p>
+</li>
+<li>
+<p>🍉统计数据表示，在连接池中连接一定的情况下，随着客户端线程的增加，出现无法连接的比率会升高，这样超时控制的等待/通知范式可以保证线程不会一直挂在连接获取的操作上。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>13.线程池技术：</p>
+<ul>
+<li>
+<p>首先，我们为什么需要线程池？</p>
+</li>
+<li>
+<p>线程频繁的被创建，被销毁都需要很大的开销，如果使用线程池统一调度，就会大大的节省资源。</p>
+<pre><code>   public interface ThreadPool&lt;Job extends Runnable&gt; { // 执行一个Job，这个Job需要实现Runnable		
+      void execute(Job job);	// 关闭线程池 
+      void shutdown();  // 增加工作者线程	
+      void addWorkers(int num); // 减少工作者线程				
+      void removeWorker(int num); // 得到正在等待执行的任务数量
+      int getJobSize(); 
+    } 
+</code></pre>
+</li>
+<li>
+<p>从线程池的实现可以看到，当客户端调用execute(Job)方法时，会不断地向任务列表jobs中 添加Job，而每个工作者线程会不断地从jobs上取出一个Job进行执行，当jobs为空时，工作者线 程进入等待状态。</p>
+</li>
+<li>
+<p>添加一个Job后，对工作队列jobs调用了其notify()方法，而不是notifyAll()方法，因为能够 确定有工作者线程被唤醒，这时使用notify()方法将会比notifyAll()方法获得更小的开销(避免 将等待队列中的线程全部移动到阻塞队列中)。</p>
+</li>
+<li>
+<p>可以看到，线程池的本质就是使用了一个线程安全的工作队列连接工作者线程和客户端线程，客户端线程将任务放入工作队列后便返回，而工作者线程则不断地从工作队列上取出 工作并执行。当工作队列为空时，所有的工作者线程均等待在工作队列上，当有客户端提交了 一个任务之后会通知任意一个工作者线程，随着大量的任务被提交，更多的工作者线程会被 唤醒。</p>
+</li>
+</ul>
+<p>14.基于线程池技术的web服务器：</p>
+<ul>
+<li>大部分Web服务器都是支持并发访问的，Tomcat和Jetty在处理请求的过程中都使用了线程池技术。<br>
+￼<img src="https://wkf1115.github.io/post-images/1588937718406.png" alt="" loading="lazy"></li>
+<li>SimpleHttpServer在建立了与客户端的连接之后，并不会处理客户端的请求， 而是将其包装成HttpRequestHandler并交由线程池处理。在线程池中的Worker处理客户端请求 的同时，SimpleHttpServer能够继续完成后续客户端连接的建立，不会阻塞后续客户端的请求。</li>
+</ul>
 ]]></content>
     </entry>
     <entry>

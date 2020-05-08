@@ -1,0 +1,276 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Java并发编程艺术第五章学习笔记📒 | WKF1115</title>
+<link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1588938291626">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Java并发编程艺术第五章学习笔记📒 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="第五章：Java中的锁：
+1.Lock接口：
+
+
+它提供的功能与sunchronized关键字类似，只不过它可以在使用时显示地获取和释放锁。
+Lock lock = new ReentrantLock();
+lock.lock();
+try..." />
+    <meta name="keywords" content="Java并发编程的艺术" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://wkf1115.github.io">
+  <img class="avatar" src="https://wkf1115.github.io/images/avatar.png?v=1588938291626" alt="">
+  </a>
+  <h1 class="site-title">
+    WKF1115
+  </h1>
+  <p class="site-description">
+    平时多学习，编码少着急。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Java并发编程艺术第五章学习笔记📒
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-05-08
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+                <a href="https://wkf1115.github.io/tag/java/syvo/" class="post-tag">
+                  # Java并发编程的艺术
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>第五章：Java中的锁：</p>
+<p>1.Lock接口：</p>
+<ul>
+<li>
+<p>它提供的功能与sunchronized关键字类似，只不过它可以在使用时显示地获取和释放锁。<br>
+Lock lock = new ReentrantLock();<br>
+lock.lock();<br>
+try {<br>
+} finally {<br>
+lock.unlock();<br>
+}</p>
+</li>
+<li>
+<p>🍉它具有synchronized关键字不具备的特性：</p>
+</li>
+<li>
+<p>1.可以非阻塞的获取锁（boolean tryLock），被synchronize修饰的方法在一个线程执行的时候其他线程都会等待锁的释放（阻塞的获取锁），这样会导致开销很大。tryLock可以立刻判断能否获得锁。</p>
+</li>
+<li>
+<p>2.能被中断的获取锁（void lockInterruptibly（）），正在获取锁的线程被中断的时候可以立刻抛出异常并且释放锁。</p>
+</li>
+<li>
+<p>3.可以指定花费多少时间来获取锁（boolean tryLock（long time,TimeUnit unit）），如果超时就不获取了。</p>
+</li>
+</ul>
+<p>2.队列同步器AQS：</p>
+<ul>
+<li>
+<p>AQS是用来构建锁或者其他同步组件的基础框架，使用一个int成员变量来表示同步状态。通过内置的FIFO队列完成线程获取排队。</p>
+</li>
+<li>
+<p>🍉使用方式：主要是继承，子类通过继承AQS来实现它的抽象方法。在实现过程中如果要对同步状态进行查询或者修改，就要使用ASQ的三个基础方法（getState()、setState(int newState)和compareAndSetState(int expect,int update)<br>
+）这三个方法可以保证线程安全。</p>
+</li>
+<li>
+<p>🍉同步器是实现锁的关键：</p>
+</li>
+<li>
+<p>1.锁是面向使用者的，锁定义了使用者与锁交互的接口，隐藏了实现细节。</p>
+</li>
+<li>
+<p>2.同步器面向锁的实现者，简化了锁的实现方式，它掌控了同步状态管理，线程排队，等待与唤醒的底层操作。屏蔽了底层的复杂操作。</p>
+</li>
+<li>
+<ol>
+<li>AQS的接口与示例：</li>
+</ol>
+<ul>
+<li>上面讲过，AQS本身是个模版，提供一些抽象方法。具体实现类继承AQS之后需要使用三个方法来设定同步的状态（这三个方法是设定好的，不需要重写）：
+<ul>
+<li>
+<p>1.getState():获取当前同步状态。</p>
+</li>
+<li>
+<p>2.setState(int newState):设置当前同步状态。</p>
+</li>
+<li>
+<p>3.compareAndSetState(int expect,int update):使用CAS设置当前状态，该方法能够保证状态设置的原子性。</p>
+</li>
+<li>
+<p>🍉而同步器可以被重写的方法分为独占式和共享式：</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://wkf1115.github.io/post-images/1588938048081.png" alt="" loading="lazy"></figure>
+<ul>
+<li>
+<p>🍉同步器也提供了一些模版方法：<br>
+<img src="https://wkf1115.github.io/post-images/1588938059427.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>基本分为三类：1.独占式获取与释放同步状态，2.共享式获取与释放同步状态和3.查询同步队列中的等待线程情况。</p>
+<ul>
+<li>独占锁就是在同一时刻只能有一个线程获取到锁，而其他获取锁的线程只能处于同步队列中等待。</li>
+<li>🍉例子：AQS里面有一个独占锁实现类，它通过state表示线程占用状态，通过CAS设置同步状态。可以看出 用户使用显式锁的时候不需要直接操作AQS，操作实现类即可。</li>
+</ul>
+</li>
+<li>
+<p>2.AQS的实现分析：</p>
+<ul>
+<li>
+<p>1.同步队列：</p>
+<ul>
+<li>AQS依赖同步队列（FIFO双向队列）来完成同步状态的管理。</li>
+<li>🍉当前线程获取同步状态失败的时候，同步器会将当前线程以及等待状态信息构造为一个节点加入同步队列中，同时线程会被阻塞。同步状态释放时，会把首节点线程唤醒，尝试再次获取同步状态。<br>
+<img src="https://wkf1115.github.io/post-images/1588938202596.png" alt="" loading="lazy"></li>
+<li>同步器拥有首节点和尾节点。<br>
+<img src="https://wkf1115.github.io/post-images/1588938217248.png" alt="" loading="lazy"><br>
+<img src="https://wkf1115.github.io/post-images/1588938226368.png" alt="" loading="lazy"></li>
+<li>🍉尾节点的插入需要使用CAS，头节点出队则不需要，因为同时只会有一个线程获取到同步状态。</li>
+</ul>
+</li>
+<li>
+<p>2.独占式同步状态获取与释放：</p>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/jvm-xue-xi-xiao-sui-bi/">
+              <h3 class="post-title">
+                JVM学习小随笔📓
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://wkf1115.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
