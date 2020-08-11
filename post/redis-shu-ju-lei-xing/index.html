@@ -2,24 +2,26 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hello Gridea | WKF1115</title>
+<title>Redis数据类型 | WKF1115</title>
 <link rel="shortcut icon" href="https://wkf1115.github.io/favicon.ico?v=1597119155552">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://wkf1115.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Hello Gridea | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="Redis数据类型 | WKF1115 - Atom Feed" href="https://wkf1115.github.io/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="👏  欢迎使用 Gridea ！
-✍️  Gridea 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...
+    <meta name="description" content="
+总：5种常用数据类型：
+1.string
+2.hash
+3.list
+4.set
+5.sorted_set
 
-Github
-Gridea 主页
-示例网站
-特性👇
-📝  你可以使用最酷的 Markdo..." />
-    <meta name="keywords" content="Gridea" />
+
+首先，redis自身是一个map，其中所有的数据都采用key：value的形式存储。key的数据类型永远是字符 串，这里讨论的..." />
+    <meta name="keywords" content="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -81,63 +83,78 @@ Gridea 主页
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Hello Gridea
+              Redis数据类型
             </h2>
             <div class="post-info">
               <span>
-                2018-12-12
+                2020-07-10
               </span>
               <span>
                 2 min read
               </span>
               
-                <a href="https://wkf1115.github.io/tag/ZFraHLMZE/" class="post-tag">
-                  # Gridea
-                </a>
-              
             </div>
-            
-              <img class="post-feature-image" src="https://wkf1115.github.io/post-images/hello-gridea.png" alt="">
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
-✍️  <strong>Gridea</strong> 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...</p>
-<!-- more -->
-<p><a href="https://github.com/getgridea/gridea">Github</a><br>
-<a href="https://gridea.dev/">Gridea 主页</a><br>
-<a href="http://fehey.com/">示例网站</a></p>
-<h2 id="特性">特性👇</h2>
-<p>📝  你可以使用最酷的 <strong>Markdown</strong> 语法，进行快速创作</p>
-<p>🌉  你可以给文章配上精美的封面图和在文章任意位置插入图片</p>
-<p>🏷️  你可以对文章进行标签分组</p>
-<p>📋  你可以自定义菜单，甚至可以创建外部链接菜单</p>
-<p>💻  你可以在 <strong>Windows</strong>，<strong>MacOS</strong> 或 <strong>Linux</strong> 设备上使用此客户端</p>
-<p>🌎  你可以使用 <strong>𝖦𝗂𝗍𝗁𝗎𝖻 𝖯𝖺𝗀𝖾𝗌</strong> 或 <strong>Coding Pages</strong> 向世界展示，未来将支持更多平台</p>
-<p>💬  你可以进行简单的配置，接入 <a href="https://github.com/gitalk/gitalk">Gitalk</a> 或 <a href="https://github.com/SukkaW/DisqusJS">DisqusJS</a> 评论系统</p>
-<p>🇬🇧  你可以使用<strong>中文简体</strong>或<strong>英语</strong></p>
-<p>🌁  你可以任意使用应用内默认主题或任意第三方主题，强大的主题自定义能力</p>
-<p>🖥  你可以自定义源文件夹，利用 OneDrive、百度网盘、iCloud、Dropbox 等进行多设备同步</p>
-<p>🌱 当然 <strong>Gridea</strong> 还很年轻，有很多不足，但请相信，它会不停向前 🏃</p>
-<p>未来，它一定会成为你离不开的伙伴</p>
-<p>尽情发挥你的才华吧！</p>
-<p>😘 Enjoy~</p>
-
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
+                <p><img src="https://wkf1115.github.io/post-images/1594390497388.png" alt="" loading="lazy"><br>
+总：5种常用数据类型：</p>
+<pre><code>1.string
+2.hash
+3.list
+4.set
+5.sorted_set
+</code></pre>
 <ul>
-<li><a href="#%E7%89%B9%E6%80%A7">特性👇</a></li>
+<li>首先，redis自身是一个map，其中所有的数据都采用key：value的形式存储。key的数据类型永远是字符 串，这里讨论的数据类型都是value的。</li>
 </ul>
+<p>string：</p>
+<pre><code>1.存储的数据：单个数据，是最简单的数据存储类型，也是最常用的。
+2.存储数据的格式：一个空间保存一个数据
+3.存储内容：通常使用字符串，如果字符串以整数的形式展示，可以作为数字操作。
+
+4.基本操作：set，get，del，mset，mget，strlen，append
+</code></pre>
+<ul>
+<li>
+<p>🍎单数据操作和多数据操作的比较（set和mset）：<br>
+<img src="https://wkf1115.github.io/post-images/1594390545959.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>可以看到，单指令插入三条指令要来回3次，也就是6次时间，而多指令只需要两次时间。</p>
+</li>
+<li>
+<p>解决主键问题：<br>
+<img src="https://wkf1115.github.io/post-images/1594390689961.png" alt="" loading="lazy"></p>
+<ul>
+<li>incr和decr为了解决数据库表主键自增问题，如果key为string里面都是数字，就可以使用incr和decr进行自增和自减。incrby和decrby可以指定增加值或者减少值。</li>
+</ul>
+</li>
+<li>
+<p>🍎string作为数值操作：<br>
+1.string在redis内部存储默认是一个字符串，当遇到incr或者decr这种增减操作的时候会转成数值进行操作。<br>
+2.redis是原子性单线程的，不会出现并发问题。<br>
+3.超过java long型数据最大值或者string不是纯数字，就会报错。</p>
 </li>
 </ul>
 
+              </div>
+              <div class="toc-container">
+                
               </div>
             </div>
           </article>
         </div>
 
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://wkf1115.github.io/post/redis-de-an-zhuang/">
+              <h3 class="post-title">
+                Redis的安装
+              </h3>
+            </a>
+          </div>
         
 
         

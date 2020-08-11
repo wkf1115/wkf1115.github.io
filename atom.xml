@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://wkf1115.github.io</id>
     <title>WKF1115</title>
-    <updated>2020-05-08T11:45:24.303Z</updated>
+    <updated>2020-08-11T04:12:42.013Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://wkf1115.github.io"/>
     <link rel="self" href="https://wkf1115.github.io/atom.xml"/>
@@ -10,6 +10,210 @@
     <logo>https://wkf1115.github.io/images/avatar.png</logo>
     <icon>https://wkf1115.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, WKF1115</rights>
+    <entry>
+        <title type="html"><![CDATA[计算机网络-数据链路层]]></title>
+        <id>https://wkf1115.github.io/post/ji-suan-ji-wang-luo-shu-ju-lian-lu-ceng/</id>
+        <link href="https://wkf1115.github.io/post/ji-suan-ji-wang-luo-shu-ju-lian-lu-ceng/">
+        </link>
+        <updated>2020-08-11T04:06:47.000Z</updated>
+        <content type="html"><![CDATA[<p>1.封装成帧</p>
+<ul>
+<li>“帧”是数据链路层数据的基本单位，发送端在网络层的一段数据前后添加特定标记形成“帧”，接收段根据前后特定标记识别出“帧”（物理层没有帧的概念，只有比特流的0/1）。</li>
+<li>“帧”的结构：帧首部+IP数据报+帧的数据+帧尾部。从帧首部到帧尾部是帧的长度。
+<ul>
+<li>（帧首部SOH）00000001，（帧尾部EOT）00000100。</li>
+</ul>
+</li>
+</ul>
+<p>2.透明传输</p>
+<ul>
+<li>“透明”在计算机领域是一个很重要的术语，代表一种实际存在的事物却看起来不存在一样。代表着虽然控制字符（帧首部和帧尾部）在帧数据中，但是要当作不存在的去处理。</li>
+<li>那么如何实现透明呢？在刚刚第一条的帧中，如果数据本身就含有帧首部和帧尾部，那么就会导致数据读取出现错误，帧首部和帧尾部不匹配。解决这种情况做法就是在插入帧尾部前加入一个转义字符ESC，在读取的时候如果遇到帧尾部，会判断它前面有没有ESC字符，如果有则代表它是一个帧尾部。</li>
+</ul>
+<p>3.差错检测</p>
+<ul>
+<li>物理层只管传输比特流，无法控制是否出错。所以数据链路层负责“差错检测”的工作。</li>
+<li>差错检测方式：</li>
+<li>1.奇偶校验码：
+<ul>
+<li>通过查数据中1的个数，如果为奇数，后面校验位为1，如果为偶数，校验位为0。在数据传输完成后对奇偶校验位和数据进行比对来验证是否发生数据丢失。</li>
+</ul>
+</li>
+<li>2.循环冗余校验码CRC：
+<ul>
+<li>
+<p>是一种根据传输或保存的数据而产生固定位数校验码的方法，检测数据传输或者保存后可能出现的错误。</p>
+</li>
+<li>
+<p>具体操作：选定一个用于校验的多项式G(X),并在数据尾部添加r个0，将添加r个0后的数据使用模“2”除法（和一般的除法相比就是使用XOR异或来代替中间的相减过程）除以多项式的位串，把得到的余数填充在原数据r个0的位置得到可校验的位串。</p>
+</li>
+<li>
+<p>例子：使用CRC计算101001的可校验位串。</p>
+</li>
+<li>
+<p>答：G(X) = x三次方 + x二次方 + 1，然后101001变成101001000。添加3个0。<br>
+<img src="https://wkf1115.github.io/post-images/1597118969026.png" alt="" loading="lazy"><br>
+￼       下一步就是进行填充，所以101001000变为101001001。组装好数据之后，接收段收到消息会将这个数据除以G(x)，根据余数判断是否出错。如果余数不是0，那么数据不正确。</p>
+</li>
+<li>
+<p>常用的CRC的G(x)多项式：<br>
+￼<img src="https://wkf1115.github.io/post-images/1597119021731.png" alt="" loading="lazy"></p>
+</li>
+</ul>
+</li>
+</ul>
+<p>4.MTU</p>
+<ul>
+<li>MTU是最大传输单元，代表了数据链路层中数据帧最大的大小。路径MTU由链路中的最小MTU决定（木桶效应）。</li>
+</ul>
+<p>5.以太网协议</p>
+<ul>
+<li>
+<p>以太网是一种使用广泛的局域网技术，以太网是一种应用于数据链路层的协议，使用以太网可以完成相邻设备的数据帧传输。</p>
+</li>
+<li>
+<p>内容：</p>
+<ul>
+<li>目的地址（MAC地址6个字节）+源地址（6个字节）+类型（2个字节）+帧数据（46-1500字节）+CRC（校验码4个字节）。</li>
+</ul>
+</li>
+<li>
+<p>例子：</p>
+<ul>
+<li>在路由器中，路由器使用以太网协议来进行数据的转发。匹配MAC地址表，找到对应的硬件接口，对不同的接口发送数据帧。（如果地址表中没有找到目标地址，首先会进行广播来确定所有连接的硬件地址，之后将地址表进行更新）。</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[计算机网络-物理层]]></title>
+        <id>https://wkf1115.github.io/post/ji-suan-ji-wang-luo-wu-li-ceng/</id>
+        <link href="https://wkf1115.github.io/post/ji-suan-ji-wang-luo-wu-li-ceng/">
+        </link>
+        <updated>2020-08-11T04:04:09.000Z</updated>
+        <content type="html"><![CDATA[<p>作用：连接不同的物理设备。传输比特流<br>
+分类：双绞线，同轴电缆，光纤。</p>
+<p>主要传输比特流：也就是高低电信号交替输出，高低电信号代表了0/1</p>
+<ul>
+<li>
+<p>信道的基本概念：</p>
+<ul>
+<li>信道是往一个方向传送信息的媒体。一条通信电路往往包含一个接收信道和一个发送信道。</li>
+</ul>
+</li>
+<li>
+<p>信道的分类：</p>
+<ul>
+<li>
+<p>1.单工通信信道：只能一个方向通信，没有反方向反馈的信道，多用于有线电视，收音机等。</p>
+</li>
+<li>
+<p>2.半双工通信信道：双方都可以发送和接收信息，但是不能双方同时发送，也不能双方同时接收。</p>
+</li>
+<li>
+<p>3.全双工通信信道：双方都可以同时发送和接收信息。目前的网线都用的是这种信道。</p>
+</li>
+<li>
+<p>分用-复用技术：<br>
+为了避免信道p2p导致的资源浪费问题，使用一个复用器和一个分用器来连接双方的机器，分用器和复用器中间是一个信道。两边的机器通过这一个信道有序的进行数据传输。</p>
+<ul>
+<li>分用-复用技术分类：
+<ul>
+<li>1.频分复用</li>
+<li>2.时分复用</li>
+<li>3.波分复用</li>
+<li>4.码分复用</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[计算机网络层次]]></title>
+        <id>https://wkf1115.github.io/post/ji-suan-ji-wang-luo-ceng-ci/</id>
+        <link href="https://wkf1115.github.io/post/ji-suan-ji-wang-luo-ceng-ci/">
+        </link>
+        <updated>2020-08-11T03:59:51.000Z</updated>
+        <content type="html"><![CDATA[<p>OSI的七层模型：<img src="https://wkf1115.github.io/post-images/1597118494553.png" alt="" loading="lazy"><br>
+市场化方面，OSI并不是实际现在使用的模型。</p>
+<p>TCP/IP四层模型：<br>
+<img src="https://wkf1115.github.io/post-images/1597118575621.png" alt="" loading="lazy"><br>
+通过网络接口层来进行交互。<br>
+<img src="https://wkf1115.github.io/post-images/1597118607105.png" alt="" loading="lazy"><br>
+<img src="https://wkf1115.github.io/post-images/1597118618364.png" alt="" loading="lazy"><br>
+<img src="https://wkf1115.github.io/post-images/1597118625350.png" alt="" loading="lazy"><br>
+<img src="https://wkf1115.github.io/post-images/1597118630064.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Redis数据类型]]></title>
+        <id>https://wkf1115.github.io/post/redis-shu-ju-lei-xing/</id>
+        <link href="https://wkf1115.github.io/post/redis-shu-ju-lei-xing/">
+        </link>
+        <updated>2020-07-10T14:14:11.000Z</updated>
+        <content type="html"><![CDATA[<p><img src="https://wkf1115.github.io/post-images/1594390497388.png" alt="" loading="lazy"><br>
+总：5种常用数据类型：</p>
+<pre><code>1.string
+2.hash
+3.list
+4.set
+5.sorted_set
+</code></pre>
+<ul>
+<li>首先，redis自身是一个map，其中所有的数据都采用key：value的形式存储。key的数据类型永远是字符 串，这里讨论的数据类型都是value的。</li>
+</ul>
+<p>string：</p>
+<pre><code>1.存储的数据：单个数据，是最简单的数据存储类型，也是最常用的。
+2.存储数据的格式：一个空间保存一个数据
+3.存储内容：通常使用字符串，如果字符串以整数的形式展示，可以作为数字操作。
+
+4.基本操作：set，get，del，mset，mget，strlen，append
+</code></pre>
+<ul>
+<li>
+<p>🍎单数据操作和多数据操作的比较（set和mset）：<br>
+<img src="https://wkf1115.github.io/post-images/1594390545959.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>可以看到，单指令插入三条指令要来回3次，也就是6次时间，而多指令只需要两次时间。</p>
+</li>
+<li>
+<p>解决主键问题：<br>
+<img src="https://wkf1115.github.io/post-images/1594390689961.png" alt="" loading="lazy"></p>
+<ul>
+<li>incr和decr为了解决数据库表主键自增问题，如果key为string里面都是数字，就可以使用incr和decr进行自增和自减。incrby和decrby可以指定增加值或者减少值。</li>
+</ul>
+</li>
+<li>
+<p>🍎string作为数值操作：<br>
+1.string在redis内部存储默认是一个字符串，当遇到incr或者decr这种增减操作的时候会转成数值进行操作。<br>
+2.redis是原子性单线程的，不会出现并发问题。<br>
+3.超过java long型数据最大值或者string不是纯数字，就会报错。</p>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Redis的安装]]></title>
+        <id>https://wkf1115.github.io/post/redis-de-an-zhuang/</id>
+        <link href="https://wkf1115.github.io/post/redis-de-an-zhuang/">
+        </link>
+        <updated>2020-07-10T14:12:21.000Z</updated>
+        <content type="html"><![CDATA[<p>docker下的安装：</p>
+<ul>
+<li>1.docker search redis</li>
+<li>2.docker pull redis:latest</li>
+<li>3.docker run -itd --name redis-test -p 6379:6379 redis</li>
+<li>4.docker exec -it redis-test /bin/bash</li>
+<li>5.接下来运行redis-cli可以进入redis的客户端。</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Java并发编程艺术第五章学习笔记📒]]></title>
         <id>https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-wu-zhang-xue-xi-bi-ji/</id>
@@ -1013,629 +1217,6 @@ Java堆中划分一片区域作为句柄池，引用类型指向句柄池中的�
 <li>大部分Web服务器都是支持并发访问的，Tomcat和Jetty在处理请求的过程中都使用了线程池技术。<br>
 ￼<img src="https://wkf1115.github.io/post-images/1588937718406.png" alt="" loading="lazy"></li>
 <li>SimpleHttpServer在建立了与客户端的连接之后，并不会处理客户端的请求， 而是将其包装成HttpRequestHandler并交由线程池处理。在线程池中的Worker处理客户端请求 的同时，SimpleHttpServer能够继续完成后续客户端连接的建立，不会阻塞后续客户端的请求。</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Java并发编程艺术第三章学习笔记📒]]></title>
-        <id>https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-san-zhang-xue-xi-bi-ji/</id>
-        <link href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-san-zhang-xue-xi-bi-ji/">
-        </link>
-        <updated>2020-04-21T09:02:00.000Z</updated>
-        <content type="html"><![CDATA[<p>第三章：java内存模型（JMM）</p>
-<ul>
-<li>
-<p>为了了解内存模型的基础，我们就要明白线程拥有两种通信机制：共享内存和消息传递</p>
-</li>
-<li>
-<p>共享内存通过主程序的内存来实现线程间的通信，所以它是隐式通信，同时它需要程序员显式的制定的执行顺序，也叫显式同步。</p>
-</li>
-<li>
-<p>消息传递通过线程之间传递消息来实现线程间的通信，所以它是显式通信，同时它不需要程序员人为指定执行顺序，因为消息发送必须在消息接收前，也叫隐式同步。</p>
-</li>
-<li>
-<p>1.JMM的抽象结构：</p>
-<ul>
-<li>
-<p>java中的共享变量（实例域，静态域，数组元素）都储存在堆内存中，这部分内存是线程共享的，也就是说他们需要受到JMM的管理。</p>
-</li>
-<li>
-<p>从抽象的角度看，每个线程拥有一个私有的本地内存，线程之间的共享变量都存在主内存中，三者之间的关系类似cpu与高速缓存与主内存的关系。</p>
-<ul>
-<li>🍉本地内存与主内存之间的关系通过JMM进行控制</li>
-<li>🍉线程之间的通信就类似于上一章的cpu，高速缓存，主内存模型中cpu与cpu之间的通信。（必须经过主内存）</li>
-<li>🍉当然，这仅仅为抽象结构，实际并不存在。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>2.🍊源代码和指令序列的重排序：（🍊本章重点，JMM离不开重排序）</p>
-<ul>
-<li>
-<p>在执行程序时，我们写的源代码为了发挥最大性能，常常会被重排序。</p>
-<ul>
-<li>
-<p>1.编译器重排序：</p>
-<pre><code>      编译器在不影响单线程语义的情况下，会重新安排语句的执行顺序。
-</code></pre>
-</li>
-<li>
-<p>2.指令级并行的重排序：</p>
-<pre><code>      cpu在机器指令不存在数据依赖性的情况，可以改变机器指令的执行顺序。
-</code></pre>
-</li>
-<li>
-<p>3.内存系统的重排序：</p>
-<pre><code>      对cpu的读取和储存操作进行修改，修改读写顺序。
-</code></pre>
-</li>
-</ul>
-</li>
-<li>
-<p>🍉对以上的2，3操作，JMM会对出现问题的重排序进行监管，为了不让程序出现排序错误，会在生成指令序列时在序列中插入内存屏障，通过屏障来禁止重排序</p>
-</li>
-</ul>
-</li>
-<li>
-<p>3.屏障类型：</p>
-<ul>
-<li>
-<p>1.LoadLoad屏障，确保前面的装载（读取）命令先于后面的装载（读取）命令</p>
-</li>
-<li>
-<p>2.StoreStore屏障，确保前面的存储（向主内存中刷入缓存区数据）先于后面的存储（向主内存中刷入缓存区数据）</p>
-</li>
-<li>
-<p>3.LoadStore屏障，确保前面的装载先于后面的存储</p>
-</li>
-<li>
-<p>4.StoreLoad屏障，这个屏障比较特殊，它会使前面的内存访问指令（存储和读取）先于后面的内存访问指令（存储和读取）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>4.happens-before：<br>
-这是一个规则，代表着两个操作之间的关系。</p>
-<ul>
-<li>
-<p>1.一个线程中的每个操作happens-before于该线程中的任意后续操作（程序顺序规则）</p>
-</li>
-<li>
-<p>2.对于一个锁的解锁，happens-before于随后对这个锁的加锁，也就是先解锁再加锁（监视器锁规则）</p>
-</li>
-<li>
-<p>3.对于一个volatile域的写，happens-before于任意后续对这个volatile域的读。（volatile变量规则）</p>
-</li>
-<li>
-<p>🍎4.如果 A happens-before  B，B happens-before C，那么 A happens-before C （传递性）</p>
-</li>
-<li>
-<p>5.如果线程A执行ThreadB.start()操作，那么A线程的ThreadB.start()操作happens-before线程B的任意操作（start（）规则）</p>
-</li>
-<li>
-<p>6.如果线程A执行ThreadB.join()操作并成功返回，那么线程B的任意操作happens-beforeA线程的ThreadB.join()操作成功返回(join()规则)</p>
-<p>那么我们定义的happens-before规则和JMM有什么关系呢。</p>
-<p>🍉JMM在底层定义了多个cpu重排序规则，JMM进而通过规则禁止某个重排序（通过屏障），而这个屏障呈现出来就是一个一个的happens-before规则。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>5.数据依赖性：</p>
-<ul>
-<li>
-<p>数据依赖性是什么呢，它是代表了两个操作如果被重排序了会影响结果。</p>
-</li>
-<li>
-<p>如果两个操作使用了同一个变量，且这两个操作中有一个为写操作，那么这两个操作就有了数据依赖性。</p>
-</li>
-<li>
-<p>例如写后读，写后写，读后写。这三个操作只要被重写，执行结果就会改变。</p>
-</li>
-<li>
-<p>🍉在JMM排序时，会遵循数据依赖性规则，具有数据依赖的两个操作不会被重排序。要注意的是这仅仅是在单个线程中遵循的规则，线程之间并不遵守。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>6.as-if-serial:</p>
-<ul>
-<li>as-if-serial语义就是不管怎么重排序，编译器和cpu都不能对存在数据依赖性的操作作重排序，这样保证了程序执行的结果正确。</li>
-<li>🍉它为程序员营造了一个幻觉：单线程程序是按照程序的顺序来执行的。</li>
-<li>🍎程序遇到if条件，cpu会执行猜测操作，即先计算if方法体的内容，将结果保存到ROB中，如果if条件为真，再把计算的值赋给if方法体内的变量，这也是一种变相的重排序。在单线程内不会影响程序结果。但在并发情况下会出现结果错误。</li>
-</ul>
-</li>
-<li>
-<p>7.顺序一致性内存模型（被同步过的程序）：</p>
-<ul>
-<li>
-<p>顺序一致性内存模型是被理想化的参考模型，程序员在实际操作的时候可以讲程序的执行顺序看作顺序一致性内存模型。</p>
-</li>
-<li>
-<p>🍉它的顺序为每个线程是原子性的，每个线程内部操作执行顺序是和程序顺序相同的。</p>
-</li>
-<li>
-<p>🍉实际上JMM采用的内存模型为保证线程原子性的同时对线程内部进行适当的重排序操作。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>8.没有同步过的程序：</p>
-<ul>
-<li>
-<p>JMM保证未同步的程序读取值一定是被初始化过的，要么为之前写入的，要么为默认值。</p>
-</li>
-<li>
-<p>🍉JMM不保证多线程和单线程之间的执行顺序相同，同时也不保证64位long型和double型的写操作具有原子性<br>
-（因为64位数据实际上写入不是一步完成的，可能会被重排序），没有同步过的单线程是不用担心的，因为数据依赖性的关系不会出现数据丢失。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>9.volatile特性在内存上的理解：</p>
-<ul>
-<li>
-<p>🍉要理解volatile特性，可以把volatile变量中读/写的操作看成对读/写操作加了同一个锁。</p>
-</li>
-<li>
-<p>🍉当然，volatile实际上和锁没啥关系，上一章讲过，volatile在cpu层面上是直接使用lock命令，虽然和锁底层实现机理相同（锁的CAS操作也调用了lock）</p>
-</li>
-<li>
-<p>🍉此处使用锁来做类比也是为了更好的理解volatile，在内存特性上，volatile的读和锁的获取有相同语义，volatile的写和锁的释放有相同语义（当volatile写入的时候，JMM会把该线程的本地内存刷新到主内存，当volatile读入的时候，会把线程本地内存置为无效，强制从主内存读取数据），</p>
-</li>
-<li>
-<p>🍎volatile读写操作不止有原子性，也有先后顺序，最后的写操作永远先于任意的读操作（上章的cpu的总线锁和缓存锁就是为此存在的）</p>
-</li>
-<li>
-<p>🍑书中写锁的内存可见性推导出volatile的内存可见性，容易被误解成volatile实现了锁的happens-before规则，但我认为书中原意是描写了volatile和锁的相似性<br>
-（两者都是基于cpu的内存锁和缓存锁）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>10.JMM如何实现volatile的内存语义：</p>
-<ul>
-<li>
-<p>JMM操作策略：</p>
-<ul>
-<li>1.volatile写永远在后面（volatile写入之前的操作不会被重排序到volatile后面）当第二个操作是volatile写的时候，第一个操作无论是什么都不能重排序</li>
-<li>2.volatile读一定在前面（volatile读之后的操作不会被重排序到volatile前面）当第一个操作是volatile读的时候，第二个操作无论是什么都不能重排序</li>
-<li>3.volatile写+读也不能排序，当第一个操作是volatile写，第二个操作是volatile读的时候，不能重排序</li>
-</ul>
-</li>
-<li>
-<p>JMM实际操作情况：</p>
-<ul>
-<li>
-<p>🍉volatile写前面插入StoreStore屏障（禁止把v写和前面的写重排序），volatile写后面插入StoreLoad屏障（比较特殊禁止全部重排序，因为下面有可能有v读）</p>
-</li>
-<li>
-<p>🍉volatile读前面插入LoadLoad屏障（禁止把前面的读和v读重排序），volatile读后面插入LoadStore屏障（禁止下面的写和v读重排序）</p>
-</li>
-<li>
-<p>JMM的屏障操作可能不是最高效的，但十分保守。</p>
-</li>
-<li>
-<p>🍎实际操作时JMM可以根据具体情况省略屏障，比如前后并没有读/写操作，这时屏障可以被省略来节省处理器内存开支</p>
-</li>
-</ul>
-</li>
-<li>
-<p>JMM屏障的发展：</p>
-<ul>
-<li>
-<p>事实上在JSR-133以前的java内存模型中，JMM允许v变量读写和普通读写的重排序，这样会导致不存在数据依赖的值（如v变量和普通变量之间）发生数据丢失。为了增强volatile的内存语义，专家组增加了上面写的那些屏障。直接导致了volatile的读写有了加锁和撤销锁的语义</p>
-</li>
-<li>
-<p>🍎volatile只能保证数据的读写是原子性的，因为volatile就是强制让线程去主内存获取数据。例子：如果两个线程同时运行i++，同时获取i=0，那么结果还是1，并没有保证线程的安全性，线程有时可能并没有更新数据，线程就被切换了。</p>
-</li>
-<li>
-<p>🍊重点：JMM实现volatile实际上是运用底层lock指令，lock指令中包含了cpu屏障技术，lock指令保证volatile读写操作的原子性和顺序，<br>
-屏障技术仅仅阻止了重排序，但并不能阻止复杂操作的数据读取混乱，例如同时运行i++。</p>
-</li>
-<li>
-<p>🍊任何带有lock前缀的指令以及CPUID等指令都有内存屏障的作用。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>11.锁特性在内存上的理解：</p>
-<ul>
-<li>
-<p>实际上</p>
-</li>
-<li>
-<p>🍉当线程释放锁时，JMM会将线程的本地内存立刻刷新到主内存中（参照上一章的图片），其实线程释放锁就是volatile的写入（上面把锁和volatile一起讲解，现在能看明白了吧）。</p>
-</li>
-<li>
-<p>🍉当线程获得锁时，JMM会把线程对应的本地内存置无效，并去主内存中读取数值，其实线程获得锁就是volatile的读取。</p>
-</li>
-<li>
-<p>🍎线程1释放锁—线程2获取锁的过程就是线程1向线程2发送信息的过程（通过主内存）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>12.JMM如何实现锁：</p>
-<ul>
-<li>
-<p>分析java中一个加锁类ReentrantLock的源代码：</p>
-<ul>
-<li>
-<p>它调用一个lock()方法获取锁，unlock()方法释放锁。</p>
-</li>
-<li>
-<p>🍉这个类的实现依赖于AQS（java同步器框架），原理为AQS会维护一个整形的volatile变量state。这个类分为公平锁和非公平锁</p>
-</li>
-<li>
-<p>公平锁：在获取锁时首先读volatile变量，这时共享变量只有当前获取锁的线程可以看到。<br>
-释放锁时写volatile变量，并且使共享变量对其他获取锁的线程可见。</p>
-</li>
-<li>
-<p>非公平锁：释放锁时和公平锁操作相同。<br>
-在获取锁的时候使用CAS方法更新state变量，CAS同时具有volatile读和写的内存语义。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>🍎通过这个类可以分析出，java中锁处理具有两种方式：<br>
-*   1.通过volatile读写的内存语义上锁<br>
-*   2.利用CAS进行上锁（CAS附带volatile的语义）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>13.CAS是如何实现的：</p>
-<ul>
-<li>
-<p>首先，CAS同时具有volatile读和写的内存语义</p>
-</li>
-<li>
-<p>比较和交换（Conmpare And Swap）是用于实现多线程同步的原子指令。 它将内存位置的内容与给定值进行比较，只有在相同的情况下，将该内存位置的内容修改为新的给定值。</p>
-</li>
-<li>
-<p>CAS实际上是调用本地处理器中的C++代码，如果程序在多处理器上运行，c++代码执行带有lock前缀的cmpxchg。如果在单处理器上运行，就会省略lock前缀。</p>
-</li>
-<li>
-<p>🍉在同一时刻，只会有一个线程更新数据成功</p>
-</li>
-</ul>
-</li>
-<li>
-<p>14.concurrent包的实现：</p>
-<ul>
-<li>
-<p>由于java的CAS和volatile运用了cpu上的原子指令，并且他们可以实现线程之间的通信，所以concurrent的通用化实现模式就诞生了。</p>
-</li>
-<li>
-<p>实现模式：声明变量为volatile，使用CAS实现线程之间的同步，之后使用volatile的读和写还有CAS所具有的v内存语义实现线程的通信。</p>
-</li>
-<li>
-<p>🍊🍊🍊重点：volatile只能保证数据读写的原子性，涉及到复杂操作，volatile并不能保证，所以这里使用CAS去更新。因为CAS每次更新前都要比较。</p>
-</li>
-<li>
-<p>整体来看，concurrent包使用了底层CAS和volatile实现了AQS，非阻塞数据结构和原子变量类，进而实现其他高层类。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>15.final在内存上的理解：</p>
-<ul>
-<li>
-<p>1.final的重排序规则：</p>
-<ul>
-<li>
-<p>1.这两个操作不能重排序，对一个对象的final变量的写入———————把这个对象的引用进行赋值给另一个引用</p>
-</li>
-<li>
-<p>2.这两个操作不能重排序，初次读一个包含final变量的引用———————初次读这个final变量</p>
-</li>
-<li>
-<p>下面对这两个重排序禁止规则详细介绍：</p>
-<ul>
-<li>
-<p>1.final写的重排序：<br>
-JMM禁止把构造函数中的写final变量操作排序到构造函数外面。</p>
-<p>🍉具体实现操作是JMM会在final变量写操作之后，构造函数结束的return之前，插入一个StoreStore屏障。这样就保证了构造函数执行完成前，final数据一定被初始化了。</p>
-<p>🍉像不是final的变量，在构造函数中赋值写入的操作可能就会被重排序到读取的后面，导致数据丢失。</p>
-</li>
-<li>
-<p>2.final读的重排序：<br>
-JMM禁止读对象引用和读对象的final值重排序</p>
-<p>（这两个操作实际上具有间接依赖关系，大部分处理器都不会重排序他们，但少部分处理器会重排序，这个规则就是为此存在的）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>🍎引用类型的final变量，和基本数据类型的重排序规则差不多，但是引用内部的数据初始化可能并不正确，<br>
-比如数组类型，可能只能初始化大小，内部的值是否初始化不一定，因为会被重排序。</p>
-</li>
-<li>
-<p>🍉还有一点，具有final变量的类，构造方法中不能出现this，这样会导致“溢出”，因为在构造方法结束之前就初始化了此对象，这样会导致屏障不能得到正确的使用。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>16.final在cpu中的实现：</p>
-<ul>
-<li>
-<p>🍉final实际上就是在final写后和构造的return前插入StoreStore屏障，在final读前插入LoadLoad屏障。</p>
-</li>
-<li>
-<p>🍉在X86处理器中，因为X86不会对写-写作重排序，所以会忽略StoreStore屏障，同时final读对象引用实际上具有间接依赖关系，X86也不会处理这个操作。<br>
-发现了吗，实际上X86对final没有进行任何操作。</p>
-</li>
-<li>
-<p>🍉现在，final修饰的变量，只要保证被正确构造，在任意线程就能看到这个被构造函数初始化之后的值。</p>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Java并发编程艺术第二章学习笔记📒]]></title>
-        <id>https://wkf1115.github.io/post/java-bing-fa-bian-cheng-di-er-zhang-xue-xi-bi-ji/</id>
-        <link href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-di-er-zhang-xue-xi-bi-ji/">
-        </link>
-        <updated>2020-04-21T07:44:57.000Z</updated>
-        <content type="html"><![CDATA[<p>第二章：java并发机制的底层实现原理</p>
-<p>核心观点：java源代码在编译后会变为java字节码，字节码被类加载器加载到jvm中，jvm执行字节码，最终转化为汇编指令在cpu上执行。<br>
-所以在讨论并发时与cpu和jvm是分不开的。</p>
-<p>1.volatile</p>
-<ul>
-<li>
-<p>首先volatile是轻量级的synchronized，它主要保证  共享变量（也就是主内存的变量） 的可见性（其他线程能否读到这个值）。<br>
-它没有加锁，没有线程上下文的切换，所以它的执行成本很低。</p>
-<ul>
-<li>
-<p>1.定义：<br>
-java语言允许线程访问共享变量，为了确保共享变量能够及时的更新，所以使用了volatile。<br>
-换句话说，如果一个字段是volatile，那么JMM会确保所有线程使用该变量的值都是一致的。</p>
-</li>
-<li>
-<p>2.底层实现：<br>
-在汇编层面，volatile实际上是使用了Lock前缀的指令，这个Lock指令实际上是<br>
-将缓存行中的指定数据写回到系统内存中，同时使其他cpu中缓存行中该数据的内存地址无效。</p>
-<ul>
-<li>
-<p>为了说明这个问题，我们使用图片模拟cpu（线程）读写数据的情况。<br>
-<img src="https://wkf1115.github.io/post-images/1587459567354.png" alt="" loading="lazy"></p>
-</li>
-<li>
-<p>首先，cpu读取数据是从缓存行进行读取，同时缓存行与主内存进行数据交互，这样能够提升程序的运行速度，在单cpu（单线程）时，这样的运行方式没有问题。<br>
-多cpu时，由于缓存行与主内存数据更新不及时，会导致数据更新丢失。<br>
-例如：java程序启动时1线程和2线程从主内存中将a  = 1的地址读取到各自的缓存行。1线程中a++，2线程中缓存行中的a并没有变化，这就导致了数据更新丢失。<br>
-<img src="https://wkf1115.github.io/post-images/1587459682774.png" alt="" loading="lazy"></p>
-</li>
-</ul>
-<p>￼</p>
-<ul>
-<li>
-<p>而volatile数据在更新时会向主内存写入数据，同时强制其他cpu读取数据A时去主内存中读取。<br>
-这样就保证了数据A更新的原子性。</p>
-</li>
-<li>
-<p>🍉把处理器缓存中数据写到内存中，以前的处理器采用总线锁定，现在大部分处理器会采用缓存锁定。锁定也是为了保证操作的原子性</p>
-</li>
-<li>
-<p>🍉处理器通常使用嗅探技术来保证不同处理器之间数据在总线上的一致性。例如，如果嗅探到一个处理器来检测其他处理器打算改写内存地址，而这个地址处于共享状态，那么处理器会使它的缓存行无效。在下次强制执行缓存行填充（这就是缓存锁的大致原理）</p>
-</li>
-</ul>
-</li>
-<li>
-<p>3.神奇的优化<br>
-JDK7中LinkTransferQueue队列类中将想要储存的变量扩充了15个变量，一个变量4个字节，算上本身有64个字节。那么为什么扩充字节反而提高了速度呢？</p>
-<ul>
-<li>因为在很多处理器中高速缓存行是64个字节，如果头尾节点不足64字节大小，那么数据读取到高速缓存行时会将头尾节点读取到同一缓存行中，我们也清楚，队列出队和入队需要对头尾节点频繁操作，如果头节点被改变，根据volatile的数据一致性，cpu会锁定对应的缓存行。这会导致其他cpu无法访问尾节点拖慢运行速度。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>2.synchronized</p>
-<ul>
-<li>
-<p>首先，对synchronized的运用实际上就是对锁的运用，java中任何一个对象都可以作为锁。</p>
-<ul>
-<li>
-<p>1.java对象头：<br>
-对象是否为锁的信息实际上是存在java对象头中的Mark Word里面，包括它的锁的类型。</p>
-</li>
-<li>
-<p>2.锁的类型：<br>
-偏向锁-&gt;轻量级锁-&gt;重量级锁</p>
-<ul>
-<li>
-<p>1.偏向锁：<br>
-在大部分情况下，程序中的锁总是由同一线程使用，如果这时重复的加锁解锁那么程序效率会浪费，为了让线程以更低的代价使用锁，偏向锁诞生了。</p>
-<ul>
-<li>
-<p>那么偏向锁是什么呢？</p>
-</li>
-<li>
-<p>当一个线程访问带锁的同步块并试图获取锁时，会在对象头中储存线程ID，以后在线程使用锁时实际验证对象头中的线程ID是否和自己的ID相同即可。</p>
-</li>
-<li>
-<p>偏向锁实际上是出现线程竞争时才会发生变化。如果1线程持有偏向锁，此时2线程想要获取偏向锁，那么到下一次全局安全点时（此时没有java字节码执行），1线程会被暂停。如果1线程依然活着，要么2线程获取到偏向锁，要么偏向锁会升级。之后暂停的1线程会被唤醒。</p>
-</li>
-<li>
-<p>🍉综上所述：偏向锁只是通过锁验证线程的ID，省时省力。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>2.轻量级锁：</p>
-<ul>
-<li>
-<p>取锁过程：</p>
-<ul>
-<li>1.线程取锁时，会复制锁中对象头的mark word到线程的栈帧（线程中储存锁记录的空间）中</li>
-<li>2.之后线程会使用CAS尝试把锁中对象头的mark word改为指向此线程的栈帧（锁记录）的指针
-<ul>
-<li>
-<p>2.1.操作成功，代表此时锁没有线程使用。</p>
-</li>
-<li>
-<p>2.2.操作失败，代表这个锁已被修改（CAS没有通过），此时由于是轻量级锁，此线程会选择进行自旋等待锁被释放，自旋一定次数会膨胀。</p>
-</li>
-<li>
-<p>🍉持有锁的线程会把程序体执行完成再进行解锁。</p>
-</li>
-<li>
-<p>🍉这里提到的自旋实际上就是等待一段时间，没有锁线程等待有锁的线程释放锁，等一会可以，如果时间太久了那么等待中的线程不干了就会掀桌。表现为进行膨胀，将锁升级为重量级。</p>
-</li>
-<li>
-<p>🍍中间过程为拿到锁的线程执行方法体的过程🍍</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>解锁过程：</p>
-<ul>
-<li>1.轻量级锁解锁时，持有锁的线程会使用CAS把线程栈帧锁记录中的Mark Word副本换回锁中的对象头中
-<ul>
-<li>
-<p>1.1成功代表没有竞争。这个锁依然为轻量级。</p>
-</li>
-<li>
-<p>1.2失败了还说啥，锁膨胀为重量级，剩下的线程进行下一轮抢锁大战。</p>
-<p>🍎如果锁在程序体执行过程中锁膨胀了，其他想要抢这个锁的线程都会进入阻塞状态直到锁被释放</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>3.重量级锁：</p>
-<ul>
-<li>
-<p>真正的synchronized，直接将没有锁的线程进行阻塞，直到锁被释放。</p>
-<ul>
-<li>
-<p>三个锁的优缺点：</p>
-<p>1.偏向锁：<br>
-优点：我们偏向锁，一天到晚除了快就是快，没别的。因为加锁解锁根本不需要额外的消耗，就是往对象头中加一串ID。<br>
-缺点：如果这个锁被别人竞争了，那么锁进行撤销的过程需要额外的消耗。</p>
-<pre><code>   🍉一个线程访问的环境就用偏向锁
-</code></pre>
-<p>2.轻量级锁：<br>
-优点：竞争的线程实际上在自旋，如果锁被释放了，线程马上可以补上，响应速度相比重量级锁的阻塞线程要快。<br>
-缺点：如果线程一直不放锁，那么自旋会消耗不必要的cpu。</p>
-<pre><code>   🍉追求响应时间，同步块执行速度快的时候用轻量级锁
-</code></pre>
-<p>3.重量级锁：<br>
-优点：和轻量级锁相比不自旋，就不会消耗cpu。<br>
-缺点：线程阻塞，相应（再启动）时间缓慢。</p>
-<pre><code>   🍉追求吞吐量，同步块执行速度较长的时候用重量级锁
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>3.原子操作的实现原理</p>
-<ul>
-<li>
-<p>1.处理器层面实现原子操作：</p>
-<ul>
-<li>
-<p>首先，处理器的基本内存操作都是原子性的，从系统内存读取或者写入一个字节都是原子的，也就是说当一个处理器读写一个字节时，其他处理器不能访问这个字节的内存地址。<br>
-但是，复杂的内存操作处理器就不能自动保证了，例如跨总线宽度，多个缓存行，跨页表的操作。这时需要两个机制：总线锁和缓存锁。</p>
-<ul>
-<li>
-<p>1.总线锁：<br>
-就是上面volatile中提到的总线锁，使用汇编中的Lock命令触发cpu的LOCK#信号，当一个cpu输出此信号时，其他cpu会被阻塞，该cpu独享主内存，处理完该数据后其他cpu才会被恢复，这就保证了数据的原子性。但是同时，其他cpu被阻塞会导致不必要的开销。目前cpu会在某些时候使用缓存锁替代总线锁。</p>
-</li>
-<li>
-<p>2.缓存锁：<br>
-由于cpu是和内部的高速缓存进行数据交互（见volatile章节的图），那么cpu1在对内部的高速缓存中的数据A进行操作时，cpu的嗅探机制会触发，同时缓存了数据A的cpu2会强制让其高速缓存内部的数据A地址失效，使其重新去主内存中获取数据A。</p>
-<p>🍉缓存锁虽好，但对某些不能存在缓存中的数据不起作用，因为人家压根就不在缓存里，并且，对跨缓存行的数据也不起作用。</p>
-</li>
-</ul>
-<p>🍎我们可以看到，其实volatile就是完全利用了cpu的原子操作，实际上就是调用了Lock命令（里面包含了屏障，下一章会讲），cpu收到Lock命令后可以选择总线锁，也可以选择缓存锁。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>2.java中实现原子操作：</p>
-<ul>
-<li>
-<p>1.循环CAS：</p>
-<ul>
-<li>
-<p>java中的CAS操作实际上是利用了cpu中的CMPXCHG指令实现的，就是比较这个值有没有发生变化。在java中有java内置的原子操作类（AtomicBoolean，AtomicInteger，AtomicLong），这些类都使用了循环CAS。并且，上面提到的轻量级锁的自旋就是循环CAS</p>
-</li>
-<li>
-<p>🍉同时循环CAS也有一些问题，例如常见的ABA问题，指的是一个值变了两次，但好像没有变化一样。这样CAS就检查不出变化。解决ABA问题的思路就是加上一个值（比如版本号），在值每次变化时都进行自增，这样可以保证值变化的唯一性。从JDK1.5开始，Atomic包中提供了解决ABA问题的类。</p>
-</li>
-<li>
-<p>🍉第二个问题也是轻量级锁的问题，那就是自旋循环CAS带来的性能开销有点大。这个问题就要斟酌看待了。使用处理器的pause指令对循环时间进行控制。</p>
-</li>
-</ul>
-</li>
-<li>
-<p>2.各种各样的锁：</p>
-<pre><code>  偏向锁，轻量级锁，重量级锁。这三个锁没啥好说的，上面有详细的讲。
-</code></pre>
-</li>
-</ul>
-<p>🍎我们到这里可以了解到，无论是CAS，轻量级锁，重量级锁，还是CMPXCHG，都是基于cpu的Lock指令<br>
-🍎lock指令有三个作用：第一个就是锁住总线（总线锁和缓存锁），第二个是禁止一部分重排序，第三个是将缓存数据刷到主内存中<br>
-🍎注意，CMPXCHG也是基于总线锁和缓存锁的，不然CAS不会有原子性</p>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Java并发编程艺术第一章学习笔记📒]]></title>
-        <id>https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-yi-zhang-xue-xi-bi-ji/</id>
-        <link href="https://wkf1115.github.io/post/java-bing-fa-bian-cheng-yi-zhu-di-yi-zhang-xue-xi-bi-ji/">
-        </link>
-        <updated>2020-04-21T07:36:45.000Z</updated>
-        <content type="html"><![CDATA[<p>第一章：关于多线程的简单介绍</p>
-<p>1.多线程中并发执行不一定比串行执行更快，当并发执行累加操作不超过百万次时，速度会比串行执行累加操作要慢。</p>
-<ul>
-<li>
-<p>造成这个情况因为线程有创建和上下文切换的开销。</p>
-</li>
-<li>
-<p>解决这个情况的方法有<br>
-1.无锁并发编程：比如通过数据的ID按照Hash算法分段，不同的线程处理不同的数据，来避免使用锁。<br>
-2.CAS算法<br>
-3.协程：在单线程中实现多任务的调度。在单线程中维持多个任务间的切换</p>
-</li>
-</ul>
-<p>2.死锁：</p>
-<ul>
-<li>
-<p>经典的例子：例如1线程运行在加A锁的方法中调用加B锁的方法，2线程运行在加B锁的方法中调用加A锁的方法，这会引起两个线程互相等待对方释放锁。</p>
-</li>
-<li>
-<p>死锁的核心问题：但在现实中这样的代码不常见，更为常见的情况是1线程拿到锁后因为一些异常（死循环）没有释放掉锁。此时也会引起死锁。归根结底是对锁释放的错误。</p>
-<ul>
-<li>避免死锁的方法：<br>
-1.避免一个线程同时获取多个锁<br>
-2.一锁一资源，一一对应。尽量不要一对多和多对一。<br>
-3.使用定时锁来替代实体锁机制。<br>
-4.数据库锁中加锁和解锁必须在一个数据库连接里。</li>
-</ul>
-</li>
 </ul>
 ]]></content>
     </entry>
